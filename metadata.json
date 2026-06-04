@@ -1,0 +1,6 @@
+{
+  "name": "Darunnajah Tours & Travel",
+  "description": "Website resmi Darunnajah Tours & Travel, menyediakan pemesanan paket wisata domestik & internasional, sewa bus pariwisata, serta pengurusan dokumen perjalanan seperti Visa dan ITAS.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
