@@ -10,12 +10,14 @@ class BookingController extends Controller
 {
     public function store(Request $request)
     {
-        // 1. Validasi data yang dikirim oleh form React
+        // 1. Validasi semua data dari form React agar sesuai dengan Model & Database
         $validated = $request->validate([
-            'customer_name'    => 'required|string|max:255',
-            'email'            => 'required|email',
-            'whatsapp_number'  => 'required|string',
-            'service_package'  => 'required|string',
+            'customer_name'   => 'required|string|max:255',
+            'email'           => 'required|email',
+            'whatsapp_number' => 'required|string',
+            'booking_date'    => 'required|string', 
+            'service'         => 'required|string',
+            'participants'    => 'required|integer',
         ]);
 
         // 2. Simpan data ke dalam tabel bookings

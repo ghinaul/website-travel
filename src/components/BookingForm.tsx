@@ -4,9 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Bus, Calendar, FileText, Users, DollarSign, Send, CheckCircle, ArrowLeft, Landmark, MessageSquare } from 'lucide-react';
+import { Send, CheckCircle, MessageSquare } from 'lucide-react';
 import { DOMESTIC_PACKAGES, INTERNATIONAL_PACKAGES, BUS_FLEET, DOCUMENT_SERVICES } from '../data';
-import { Booking } from '../types';
 
 interface BookingFormProps {
   preselectedService?: {
@@ -18,62 +17,70 @@ interface BookingFormProps {
   onBookingSuccess: () => void;
 }
 
-export default function BookingForm({ preselectedService, onClearPreselected, onBookingSuccess }: BookingFormProps) {
-  // Main fields
+export default function BookingForm({ 
+  preselectedService, 
+  onClearPreselected, 
+  onBookingSuccess 
+}: BookingFormProps) {
+  // --- State ---
   const [serviceType, setServiceType] = useState<'package' | 'rentcar' | 'visa_itas'>('package');
   const [selectedItemId, setSelectedItemId] = useState('');
   
+  // Data Diri
   const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [customerEmail, setCustomerEmail] = useState('');
+  const [whatsappNumber, setWhatsappNumber] = useState(''); // ← Ubah ke whatsapp_number
+  const [email, setEmail] = useState('');                  // ← Ubah ke email
   const [identityNumber, setIdentityNumber] = useState('');
   const [bookingDate, setBookingDate] = useState('');
-  const [multiplier, setMultiplier] = useState(1); // can be passengers count or rental duration in days
+  const [multiplier, setMultiplier] = useState(1);
   const [specialNotes, setSpecialNotes] = useState('');
 
-  // Form submission feedback
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [generatedBooking, setGeneratedBooking] = useState<Booking | null>(null);
+  const [generatedData, setGeneratedData] = useState<any>(null);
   const [validationError, setValidationError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Set default values or preselected parameters
+  // --- Effects ---
   useEffect(() => {
     if (preselectedService) {
       setServiceType(preselectedService.type);
       setSelectedItemId(preselectedService.id);
-      // reset defaults
-      setMultiplier(1);
     } else {
-      // Set first item as default for current category
       updateDefaultItem(serviceType);
     }
-  }, [preselectedService, serviceType]);
+  }, [preselectedService]);
 
+  // --- Helpers ---
   const updateDefaultItem = (type: 'package' | 'rentcar' | 'visa_itas') => {
-    if (type === 'package') {
-      setSelectedItemId(DOMESTIC_PACKAGES[0].id);
-    } else if (type === 'rentcar') {
-      setSelectedItemId(BUS_FLEET[0].id);
-    } else {
-      setSelectedItemId(DOCUMENT_SERVICES[0].id);
-    }
+    let defaultId = '';
+    if (type === 'package') defaultId = DOMESTIC_PACKAGES[0]?.id || '';
+    else if (type === 'rentcar') defaultId = BUS_FLEET[0]?.id || '';
+    else defaultId = DOCUMENT_SERVICES[0]?.id || '';
+    setSelectedItemId(defaultId);
   };
 
-  // List of available sub-items depending on active service category
+  const handleServiceTypeChange = (type: 'package' | 'rentcar' | 'visa_itas') => {
+    onClearPreselected();
+    setServiceType(type);
+    updateDefaultItem(type);
+    setMultiplier(1);
+    setValidationError('');
+  };
+
   const getSubItems = () => {
     if (serviceType === 'package') {
       return [...DOMESTIC_PACKAGES, ...INTERNATIONAL_PACKAGES].map(p => ({
         id: p.id,
         name: `${p.title} (${p.duration})`,
         price: p.pricePerPax,
-        multiplierLabel: 'Jumlah Peserta / Pax'
+        multiplierLabel: 'Jumlah Peserta'
       }));
     } else if (serviceType === 'rentcar') {
       return BUS_FLEET.map(b => ({
         id: b.id,
         name: `${b.name} (${b.capacity} Kursi)`,
         price: b.pricePerDay,
-        multiplierLabel: 'Durasi Sewa (Hari)'
+        multiplierLabel: 'Durasi (Hari)'
       }));
     } else {
       return DOCUMENT_SERVICES.map(d => ({
@@ -88,100 +95,92 @@ export default function BookingForm({ preselectedService, onClearPreselected, on
   const activeSubItems = getSubItems();
   const currentSubItem = activeSubItems.find(item => item.id === selectedItemId) || activeSubItems[0];
   
-  // Calculate pricing quote live
   const calculateTotal = () => {
-    if (!currentSubItem) return 0;
-    return currentSubItem.price * multiplier;
+    return currentSubItem ? currentSubItem.price * multiplier : 0;
   };
 
-  const handleServiceTypeChange = (type: 'package' | 'rentcar' | 'visa_itas') => {
-    onClearPreselected();
-    setServiceType(type);
-    updateDefaultItem(type);
-    setMultiplier(1);
-  };
-
-  // Form Submission
-  const handleSubmit = (e: React.FormEvent) => {
+  // --- Submit Handler: KIRIM KE LARAVEL API ---
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError('');
+    setIsSubmitting(true);
 
-    // Field Validations
-    if (!customerName.trim()) return setValidationError('Mohon masukkan nama lengkap Anda.');
-    if (!customerPhone.trim()) return setValidationError('Mohon masukkan nomor WhatsApp aktif Anda.');
-    if (!customerEmail.trim()) return setValidationError('Mohon masukkan alamat email Anda.');
-    if (!bookingDate) return setValidationError('Mohon pilih tanggal keberangkatan / sewa.');
-    if (multiplier < 1) return setValidationError('Jumlah minimal harus bernilai 1.');
-    if (!selectedItemId) return setValidationError('Pilih paket atau jenis layanan terlebih dahulu.');
+    // 1. Validasi Dasar
+    if (!customerName.trim()) {
+      setValidationError('Mohon masukkan nama lengkap Anda.');
+      setIsSubmitting(false);
+      return;
+    }
+    if (!whatsappNumber.trim()) {
+      setValidationError('Mohon masukkan nomor WhatsApp aktif Anda.');
+      setIsSubmitting(false);
+      return;
+    }
+    if (!email.trim()) {
+      setValidationError('Mohon masukkan alamat email Anda.');
+      setIsSubmitting(false);
+      return;
+    }
+    if (!bookingDate) {
+      setValidationError('Mohon pilih tanggal keberangkatan.');
+      setIsSubmitting(false);
+      return;
+    }
 
-    // Create unique booking identification code
-    const datePrefix = new Date().getFullYear().toString();
-    const randomSuffix = Math.floor(10000 + Math.random() * 90000);
-    const bookingCode = `DNJ-${datePrefix}-${randomSuffix}`;
-    const totalAmount = calculateTotal();
-
-    const newBooking: Booking = {
-      id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 11),
-      bookingCode,
-      customerName,
-      customerPhone,
-      customerEmail,
-      serviceType,
-      serviceId: selectedItemId,
-      serviceName: currentSubItem ? currentSubItem.name : 'Layan Darunnajah',
-      bookingDate,
-      passengersOrDuration: multiplier,
-      totalPrice: totalAmount,
-      status: 'Pending',
-      createdAt: new Date().toISOString(),
-      notes: specialNotes,
-      identityNumber
-    };
-
+    // 2. Kirim ke Backend Laravel
     try {
-      // Fetch current bookings list from local storage
-      const existingStr = localStorage.getItem('darunnajah_bookings') || '[]';
-      const existingBookings: Booking[] = JSON.parse(existingStr);
-      existingBookings.unshift(newBooking);
-      localStorage.setItem('darunnajah_bookings', JSON.stringify(existingBookings));
+      const response = await fetch('http://127.0.0.1:8000/api/booking/store', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+        customer_name: customerName,     // pastikan kirim dengan key 'customer_name'
+        email: email,
+        whatsapp_number: whatsappNumber, // pastikan 'whatsapp_number' bukan 'whatsapp'
+        booking_date: bookingDate,       // pastikan 'booking_date'
+        service: service,                // PASTIKAN ini dikirim sebagai 'service'
+        participants: Number(participants), // pastikan 'participants'
+        }),
+      });
 
-      // Show success screen
-      setGeneratedBooking(newBooking);
-      setIsSubmitted(true);
-      onBookingSuccess();
-    } catch (err) {
-      console.error(err);
-      setValidationError('Terjadi kesalahan sistem saat menyimpan pemesanan.');
+      const data = await response.json();
+
+      if (response.ok) {
+        setGeneratedData(data.data);
+        setIsSubmitted(true);
+        if (onBookingSuccess) onBookingSuccess();
+      } else {
+        setValidationError(data.message || 'Gagal menyimpan pesanan.');
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setValidationError('Gagal terhubung ke server. Pastikan backend Laravel aktif.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // Compose dynamic WhatsApp message content
   const getWhatsAppLink = () => {
-    if (!generatedBooking) return '';
-    const textMessage = `Halo Admin Darunnajah Tours & Travel, saya ingin konfirmasi pemesanan layanan berikut:
+    if (!generatedData) return '';
+    const textMessage = `Halo Admin Darunnajah, saya ingin konfirmasi pemesanan:
 
-*KODE PEMESANAN:* ${generatedBooking.bookingCode}
-*Nama Lengkap:* ${generatedBooking.customerName}
-*No. WhatsApp:* ${generatedBooking.customerPhone}
-*Layanan:* ${generatedBooking.serviceName}
-*Tanggal:* ${generatedBooking.bookingDate}
-*Kapasitas/Durasi:* ${generatedBooking.passengersOrDuration} ${serviceType === 'rentcar' ? 'Hari' : 'Orang'}
-*Total Estimasi:* Rp ${generatedBooking.totalPrice.toLocaleString('id-ID')}
-*Catatan khusus:* ${generatedBooking.notes || '-'}
+*Nama:* ${customerName}
+*Layanan:* ${currentSubItem?.name}
+*Tanggal:* ${bookingDate}
 
-Mohon bantuan Anda untuk langkah pembayaran dan konfirmasi armada. Terima kasih!`;
+Mohon konfirmasi selanjutnya.`;
 
     return `https://wa.me/6281222222222?text=${encodeURIComponent(textMessage)}`;
   };
 
-  // Reset form to place new booking
   const handleReset = () => {
     setIsSubmitted(false);
-    setGeneratedBooking(null);
+    setGeneratedData(null);
     setCustomerName('');
-    setCustomerPhone('');
-    setCustomerEmail('');
-    setIdentityNumber('');
+    setWhatsappNumber('');
+    setEmail('');
     setBookingDate('');
     setMultiplier(1);
     setSpecialNotes('');
@@ -189,14 +188,13 @@ Mohon bantuan Anda untuk langkah pembayaran dan konfirmasi armada. Terima kasih!
     updateDefaultItem('package');
   };
 
+  // --- Render ---
   return (
     <div id="booking-section" className="py-20 bg-emerald-950 text-white relative">
-      {/* Visual background accents */}
       <div className="absolute inset-0 z-0 opacity-10 pointer-events-none bg-[radial-gradient(ellipse_at_top,rgba(251,191,36,0.15)_0,transparent_50%)]" />
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* Step-by-Step Title header */}
         <div className="text-center mb-12">
           <span className="text-xs font-bold text-amber-400 uppercase tracking-widest bg-emerald-900 border border-emerald-800 px-3 py-1.5 rounded-full inline-block mb-3">
             Sistem Booking Terpadu
@@ -204,287 +202,111 @@ Mohon bantuan Anda untuk langkah pembayaran dan konfirmasi armada. Terima kasih!
           <h2 className="text-3xl font-extrabold sm:text-4xl tracking-tight">
             Formulir Reservasi Digital
           </h2>
-          <p className="mt-2 text-emerald-200 text-xs md:text-sm max-w-lg mx-auto">
-            Isi formulir pendaftaran di bawah ini. Selesai memesan, sistem akan otomatis mencatat data Anda dan menghubungkan Anda dengan petugas administrasi travel kami di Ulujami.
-          </p>
         </div>
 
-        {/* Dynamic Inner views */}
         {!isSubmitted ? (
           <div className="bg-emerald-900/40 border border-emerald-850/80 rounded-[32px] p-6 sm:p-12 backdrop-blur-xl shadow-2xl">
-            {/* Category tabs selection */}
-            <div className="grid grid-cols-3 gap-2 mb-10 bg-[#031d10]/90 p-1.5 rounded-2xl border border-emerald-900/80 shadow-inner">
-              <button
-                type="button"
-                onClick={() => handleServiceTypeChange('package')}
-                className={`py-3 px-1 rounded-xl text-[10px] sm:text-xs font-black uppercase transition-all tracking-widest cursor-pointer ${
-                  serviceType === 'package' ? 'bg-amber-500 text-emerald-950 shadow-md scale-[1.01]' : 'text-emerald-300/80 hover:text-white hover:bg-emerald-850/40'
-                }`}
-              >
+            {/* Tabs */}
+            <div className="grid grid-cols-3 gap-2 mb-10 bg-[#031d10]/90 p-1.5 rounded-2xl border border-emerald-900/80">
+              <button type="button" onClick={() => handleServiceTypeChange('package')} className={`py-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest ${serviceType === 'package' ? 'bg-amber-500 text-emerald-950' : 'text-emerald-300/80'}`}>
                 Paket Wisata
               </button>
-              <button
-                type="button"
-                onClick={() => handleServiceTypeChange('rentcar')}
-                className={`py-3 px-1 rounded-xl text-[10px] sm:text-xs font-black uppercase transition-all tracking-widest cursor-pointer ${
-                  serviceType === 'rentcar' ? 'bg-amber-500 text-emerald-950 shadow-md scale-[1.01]' : 'text-emerald-300/80 hover:text-white hover:bg-emerald-850/40'
-                }`}
-              >
-                Sewa Bus/Mobil
+              <button type="button" onClick={() => handleServiceTypeChange('rentcar')} className={`py-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest ${serviceType === 'rentcar' ? 'bg-amber-500 text-emerald-950' : 'text-emerald-300/80'}`}>
+                Sewa Bus
               </button>
-              <button
-                type="button"
-                onClick={() => handleServiceTypeChange('visa_itas')}
-                className={`py-3 px-1 rounded-xl text-[10px] sm:text-xs font-black uppercase transition-all tracking-widest cursor-pointer ${
-                  serviceType === 'visa_itas' ? 'bg-amber-500 text-emerald-950 shadow-md scale-[1.01]' : 'text-emerald-300/80 hover:text-white hover:bg-emerald-850/40'
-                }`}
-              >
+              <button type="button" onClick={() => handleServiceTypeChange('visa_itas')} className={`py-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest ${serviceType === 'visa_itas' ? 'bg-amber-500 text-emerald-950' : 'text-emerald-300/80'}`}>
                 Visa & ITAS
               </button>
             </div>
 
-            {/* Validation errors alert banner */}
             {validationError && (
-              <div className="mb-6 p-4 bg-red-950/80 border border-red-800 rounded-xl text-red-200 text-xs font-medium flex items-center gap-3">
-                <span className="w-2 h-2 rounded-full bg-red-400 block shrink-0 animate-ping" />
-                <span>{validationError}</span>
+              <div className="mb-6 p-4 bg-red-950/80 border border-red-800 rounded-xl text-red-200 text-sm">
+                {validationError}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              
-              {/* Part 1: Service choices */}
+              {/* Pilih Layanan */}
               <div className="grid sm:grid-cols-2 gap-6 bg-emerald-950/40 p-5 rounded-2xl border border-emerald-800/60">
                 <div>
-                  <label className="block text-[11px] text-emerald-300 uppercase font-black tracking-wider mb-2">
-                    Layanan Yang Dipilih
-                  </label>
-                  <select
-                    value={selectedItemId}
-                    onChange={(e) => setSelectedItemId(e.target.value)}
-                    className="w-full bg-emerald-950 text-white text-sm rounded-xl px-4 py-3 border border-emerald-800 focus:outline-none focus:border-amber-500"
-                  >
+                  <label className="block text-xs text-emerald-300 uppercase font-bold mb-2">Layanan</label>
+                  <select value={selectedItemId} onChange={(e) => setSelectedItemId(e.target.value)} className="w-full bg-emerald-950 text-white rounded-xl px-4 py-3 border border-emerald-800">
                     {activeSubItems.map(item => (
-                      <option key={item.id} value={item.id}>
-                        {item.name}
-                      </option>
+                      <option key={item.id} value={item.id}>{item.name}</option>
                     ))}
                   </select>
                 </div>
-
                 <div>
-                  <label className="block text-[11px] text-emerald-300 uppercase font-black tracking-wider mb-2">
-                    {currentSubItem ? currentSubItem.multiplierLabel : 'Jumlah / Durasi'}
-                  </label>
-                  <div className="flex items-center bg-emerald-950 rounded-xl overflow-hidden border border-emerald-800">
-                    <button
-                      type="button"
-                      onClick={() => setMultiplier(prev => Math.max(1, prev - 1))}
-                      className="px-4 py-3 text-emerald-300 hover:text-white hover:bg-emerald-900 border-r border-emerald-800 font-bold"
-                    >
-                      -
-                    </button>
-                    <input
-                      type="number"
-                      min={1}
-                      value={multiplier}
-                      onChange={(e) => setMultiplier(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-full text-center bg-transparent focus:outline-none text-white text-sm font-bold"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setMultiplier(prev => prev + 1)}
-                      className="px-4 py-3 text-emerald-300 hover:text-white hover:bg-emerald-900 border-l border-emerald-800 font-bold"
-                    >
-                      +
-                    </button>
+                  <label className="block text-xs text-emerald-300 uppercase font-bold mb-2">{currentSubItem?.multiplierLabel}</label>
+                  <div className="flex">
+                    <button type="button" onClick={() => setMultiplier(m => Math.max(1, m - 1))} className="px-4 py-3 border border-emerald-800 font-bold">-</button>
+                    <input type="number" min={1} value={multiplier} onChange={(e) => setMultiplier(Math.max(1, parseInt(e.target.value) || 1))} className="w-full text-center bg-emerald-950 border-y border-emerald-800" />
+                    <button type="button" onClick={() => setMultiplier(m => m + 1)} className="px-4 py-3 border border-emerald-800 font-bold">+</button>
                   </div>
                 </div>
               </div>
 
-              {/* Part 2: Customer Bio Information */}
+              {/* Data Diri */}
               <div className="space-y-4">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-amber-400 border-b border-emerald-800 pb-2">Informasi Pemesan / Kontak</h3>
-                
+                <h3 className="text-sm font-bold uppercase text-amber-400 border-b border-emerald-800 pb-2">Informasi Pemesan</h3>
                 <div className="grid sm:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-[11px] text-emerald-300 uppercase font-bold mb-1.5">Nama Lengkap Sesuai KTP</label>
-                    <input
-                      type="text"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      placeholder="Contoh: Ahmad Fauzi"
-                      className="w-full bg-emerald-950 text-white text-sm rounded-xl py-3 px-4 border border-emerald-800 focus:outline-none focus:border-amber-400"
-                    />
+                    <label className="block text-xs text-emerald-300 mb-1">Nama Lengkap</label>
+                    <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full bg-emerald-950 rounded-xl py-3 px-4 border border-emerald-800" />
                   </div>
-
                   <div>
-                    <label className="block text-[11px] text-emerald-300 uppercase font-bold mb-1.5">Nomor WhatsApp Aktif</label>
-                    <input
-                      type="tel"
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      placeholder="Contoh: 081234567890"
-                      className="w-full bg-emerald-950 text-white text-sm rounded-xl py-3 px-4 border border-emerald-800 focus:outline-none focus:border-amber-400"
-                    />
+                    <label className="block text-xs text-emerald-300 mb-1">No. WhatsApp</label>
+                    <input type="tel" value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} className="w-full bg-emerald-950 rounded-xl py-3 px-4 border border-emerald-800" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-emerald-300 mb-1">Email</label>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-emerald-950 rounded-xl py-3 px-4 border border-emerald-800" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-emerald-300 mb-1">Tanggal</label>
+                    <input type="date" value={bookingDate} onChange={(e) => setBookingDate(e.target.value)} className="w-full bg-emerald-950 rounded-xl py-3 px-4 border border-emerald-800" />
                   </div>
                 </div>
-
-                <div className="grid sm:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-[11px] text-emerald-300 uppercase font-bold mb-1.5">Alamat Email Aktif</label>
-                    <input
-                      type="email"
-                      value={customerEmail}
-                      onChange={(e) => setCustomerEmail(e.target.value)}
-                      placeholder="Contoh: fauzi@email.com"
-                      className="w-full bg-emerald-950 text-white text-sm rounded-xl py-3 px-4 border border-emerald-800 focus:outline-none focus:border-amber-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] text-emerald-300 uppercase font-bold mb-1.5">No. Kartu Identitas (Optional)</label>
-                    <input
-                      type="text"
-                      value={identityNumber}
-                      onChange={(e) => setIdentityNumber(e.target.value)}
-                      placeholder="KTP / No. Paspor (Optional)"
-                      className="w-full bg-emerald-950 text-white text-sm rounded-xl py-3 px-4 border border-emerald-800 focus:outline-none focus:border-amber-400"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid sm:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-[11px] text-emerald-300 uppercase font-bold mb-1.5">Rencana Tanggal Perjalanan / Mulai Sewa</label>
-                    <input
-                      type="date"
-                      value={bookingDate}
-                      onChange={(e) => setBookingDate(e.target.value)}
-                      className="w-full bg-emerald-950 text-white text-sm rounded-xl py-3 px-4 border border-emerald-800 focus:outline-none focus:border-amber-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] text-emerald-300 uppercase font-bold mb-1.5">Catatan Tambahan untuk Kru</label>
-                    <input
-                      type="text"
-                      value={specialNotes}
-                      onChange={(e) => setSpecialNotes(e.target.value)}
-                      placeholder="Contoh: Membawa perlengkapan kursi roda, dsb."
-                      className="w-full bg-emerald-950 text-white text-sm rounded-xl py-3 px-4 border border-emerald-800 focus:outline-none focus:border-amber-400"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-xs text-emerald-300 mb-1">Catatan</label>
+                  <input type="text" value={specialNotes} onChange={(e) => setSpecialNotes(e.target.value)} className="w-full bg-emerald-950 rounded-xl py-3 px-4 border border-emerald-800" />
                 </div>
               </div>
 
-              {/* Pricing Quote Summary Banner */}
+              {/* Kalkulasi Harga */}
               {currentSubItem && (
-                <div className="bg-emerald-950/80 p-6 rounded-2xl border border-emerald-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-8">
+                <div className="bg-emerald-950/80 p-4 rounded-xl flex justify-between items-center">
                   <div>
-                    <span className="text-[10px] text-emerald-400 font-mono uppercase tracking-wider block">Kalkulasi Tarif Transparan</span>
-                    <div className="text-xs text-emerald-200 mt-1">
-                      {currentSubItem.price.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })} x {multiplier} {serviceType === 'rentcar' ? 'Hari' : 'Orang'}
-                    </div>
+                    <span className="text-xs text-emerald-400">Estimasi Total</span>
                   </div>
-                  <div className="text-right">
-                    <span className="text-[10px] text-emerald-400 font-mono uppercase tracking-wider block">Total Estimasi Estimasi</span>
-                    <div className="text-2xl font-black text-amber-400">
-                      {calculateTotal().toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })}
-                    </div>
+                  <div className="text-xl font-bold text-amber-400">
+                    Rp {calculateTotal().toLocaleString('id-ID')}
                   </div>
                 </div>
               )}
 
-              {/* Submit Buttons */}
-              <div className="pt-4">
-                <button
-                  type="submit"
-                  className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-emerald-950 font-extrabold rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-[1.01] flex items-center justify-center gap-2 cursor-pointer text-sm"
-                  id="submit-booking-form"
-                >
-                  <Send className="h-4 w-4" />
-                  Kirim Pengajuan Booking Online
-                </button>
-              </div>
-
+              {/* Submit */}
+              <button type="submit" disabled={isSubmitting} className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-emerald-950 font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50">
+                <Send className="h-4 w-4" />
+                {isSubmitting ? 'Mengirim...' : 'Kirim Pemesanan'}
+              </button>
             </form>
           </div>
         ) : (
-          /* Step 3: Success Screen (Invoice & WhatsApp confirmation) */
-          <div className="bg-white text-emerald-950 rounded-3xl p-6 sm:p-10 shadow-2xl border border-emerald-100 max-w-2xl mx-auto text-center">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="h-10 w-10 text-emerald-700" />
-            </div>
-
-            <h3 className="text-2xl font-extrabold text-emerald-950 mb-2">Pengajuan Berhasil Dikirim!</h3>
-            <p className="text-emerald-800 text-xs md:text-sm mb-6">
-              Data Anda telah tercatat secara resmi di database travel PT Darunnajah Zahra Utama Ulujami. Berikut adalah ringkasan invoice digital Anda:
-            </p>
-
-            {/* Simulated Digital Invoice sheet */}
-            <div className="bg-emerald-50 rounded-2xl p-6 text-left border border-emerald-100 font-mono text-xs text-emerald-900 mb-8 space-y-3">
-              <div className="flex justify-between border-b border-emerald-200/60 pb-3 font-bold text-[13px]">
-                <span>DARUNNAJAH TRAV OFFICE</span>
-                <span className="text-emerald-700">INVOICE</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Kode Booking:</span>
-                <span className="font-bold text-emerald-950">{generatedBooking?.bookingCode}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Nama Pemesan:</span>
-                <span className="font-bold text-emerald-950">{generatedBooking?.customerName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Kontak:</span>
-                <span className="font-bold">{generatedBooking?.customerPhone}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Layanan:</span>
-                <span className="font-bold text-emerald-950 truncate max-w-[200px]">{generatedBooking?.serviceName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Rencana Tanggal:</span>
-                <span className="font-bold">{generatedBooking?.bookingDate}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Kuantitas:</span>
-                <span className="font-bold">{generatedBooking?.passengersOrDuration} {serviceType === 'rentcar' ? 'Hari' : 'Paket'}</span>
-              </div>
-              <div className="flex justify-between border-t border-emerald-200/60 pt-3 text-sm font-black">
-                <span>TOTAL TAGIHAN:</span>
-                <span className="text-emerald-800">Rp {generatedBooking?.totalPrice.toLocaleString('id-ID')}</span>
-              </div>
-              <div className="text-[10px] text-center text-emerald-700 mt-4 italic font-sans block pt-2 border-t border-dashed border-emerald-200">
-                Hubungi Admin kami via WA di bawah untuk verifikasi pembayaran dan detail armada.
-              </div>
-            </div>
-
-            {/* Actions for client checkout */}
-            <div className="space-y-3">
-              <a
-                href={getWhatsAppLink()}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full py-4 bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all text-xs cursor-pointer"
-                id="invoice-wa-confirm"
-              >
-                <MessageSquare className="h-4.5 w-4.5" />
-                Konfirmasi Pembayaran via WhatsApp
-              </a>
-
-              <button
-                type="button"
-                onClick={handleReset}
-                className="w-full py-3 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold rounded-xl text-xs transition-colors cursor-pointer"
-              >
-                Buat Pemesanan Baru
-              </button>
-            </div>
+          /* Success Screen */
+          <div className="bg-white text-emerald-950 rounded-3xl p-8 text-center">
+            <CheckCircle className="h-16 w-16 text-emerald-600 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold mb-2">Pemesanan Berhasil!</h3>
+            <p className="text-emerald-800 mb-6">Tim Darunnajah akan menghubungi Anda segera.</p>
+            
+            <a href={getWhatsAppLink()} target="_blank" className="block w-full py-3 bg-[#25D366] text-white font-bold rounded-xl mb-3">
+              Konfirmasi via WhatsApp
+            </a>
+            <button onClick={handleReset} className="text-emerald-600 text-sm underline">
+              Buat Pemesanan Baru
+            </button>
           </div>
         )}
-
       </div>
     </div>
   );

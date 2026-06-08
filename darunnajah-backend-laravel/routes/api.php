@@ -5,4 +5,4 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\BookingController;
 
 // Jalur pintu masuk untuk menyimpan data booking dari React
-Route::post('/booking', [BookingController::class, 'store']);
+Route::post('/booking/store', [BookingController::class, 'store']);
