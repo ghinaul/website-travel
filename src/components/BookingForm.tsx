@@ -135,14 +135,15 @@ export default function BookingForm({
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: JSON.stringify({
-        customer_name: customerName,     // pastikan kirim dengan key 'customer_name'
+      body: JSON.stringify({
+        customer_name: customerName,
         email: email,
-        whatsapp_number: whatsappNumber, // pastikan 'whatsapp_number' bukan 'whatsapp'
-        booking_date: bookingDate,       // pastikan 'booking_date'
-        service: service,                // PASTIKAN ini dikirim sebagai 'service'
-        participants: Number(participants), // pastikan 'participants'
-        }),
+        whatsapp_number: whatsappNumber,
+        booking_date: bookingDate,
+        service: selectedItemId,     // Pastikan menggunakan selectedItemId
+        participants: multiplier,    // Pastikan menggunakan multiplier
+        notes: specialNotes,         // Sesuaikan dengan kebutuhan
+    }),
       });
 
       const data = await response.json();
@@ -163,16 +164,20 @@ export default function BookingForm({
   };
 
   const getWhatsAppLink = () => {
-    if (!generatedData) return '';
-    const textMessage = `Halo Admin Darunnajah, saya ingin konfirmasi pemesanan:
+    // Tentukan nomor WhatsApp Admin Travel asli di sini (awali dengan 62)
+    const nomorAdmin = "6281285567034"; 
 
-*Nama:* ${customerName}
-*Layanan:* ${currentSubItem?.name}
-*Tanggal:* ${bookingDate}
+    const textMessage = `Halo Admin Darunnajah Tours & Travel, saya ingin mengonfirmasi pemesanan yang baru saja saya buat di website:
 
-Mohon konfirmasi selanjutnya.`;
+*Nama Pemesan:* ${customerName}
+*Email:* ${email}
+*No. WhatsApp:* ${whatsappNumber}
+*Tanggal Booking:* ${bookingDate}
+*Jumlah Peserta:* ${multiplier} Orang
 
-    return `https://wa.me/6281222222222?text=${encodeURIComponent(textMessage)}`;
+Mohon untuk diproses lebih lanjut. Terima kasih!`;
+
+    return `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(textMessage)}`;
   };
 
   const handleReset = () => {
@@ -226,7 +231,7 @@ Mohon konfirmasi selanjutnya.`;
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Pilih Layanan */}
+           {/* Pilih Layanan */}
               <div className="grid sm:grid-cols-2 gap-6 bg-emerald-950/40 p-5 rounded-2xl border border-emerald-800/60">
                 <div>
                   <label className="block text-xs text-emerald-300 uppercase font-bold mb-2">Layanan</label>

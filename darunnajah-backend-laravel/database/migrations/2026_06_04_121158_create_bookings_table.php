@@ -12,14 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('bookings', function (Blueprint $table) {
-            $table->id();
-            $table->string('customer_name');    // Nama pemesan
-            $table->string('email');            // Email pemesan
-            $table->string('whatsapp_number');   // No WhatsApp
-            $table->string('service_package');   // Paket travel yang dipilih
-            $table->string('status')->default('pending'); // Status otomatis pending
-            $table->timestamps();
-        });
+        $table->id();
+        $table->string('customer_name');     // Nama pemesan
+        $table->string('email');             // Email pemesan
+        $table->string('whatsapp_number');   // No WhatsApp
+        $table->date('booking_date');        // Tanggal Keberangkatan (Tambahkan ini)
+        $table->string('service');           // Ubah 'service_package' menjadi 'service' agar sinkron
+        $table->integer('participants');     // Jumlah Peserta (Tambahkan ini)
+        $table->text('notes')->nullable();   // Catatan Tambahan (Tambahkan ini)
+        $table->string('status')->default('pending'); // Status otomatis pending
+        $table->timestamps();
+    });
     }
 
     /**
