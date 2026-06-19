@@ -21,21 +21,41 @@ export default function StaffDashboard() {
   const [loginError, setLoginError] = useState('');
 
   // Loads latest state from local storage
-  const loadBookings = () => {
+ // Mengambil data asli dari API Laravel & petakan ke format UI React
+const loadBookings = async () => {
     try {
-      const stored = localStorage.getItem('darunnajah_bookings') || '[]';
-      setBookings(JSON.parse(stored));
+      const response = await fetch('http://localhost:8000/api/bookings');
+      const data = await response.json();
+      
+      // Proses mengubah nama kolom dari Laravel agar pas dengan UI React
+      const mappedData = data.map((b: any) => {
+        // Penyesuaian nama paket secara otomatis untuk tampilan UI admin
+        const serviceName = b.service?.includes('int') 
+          ? 'Umroh Syawal Barokah Exclusive (9 Hari)' 
+          : 'PO Darunnajah Luxury Big Bus (59 Kursi)';
+
+        return {
+          id: b.id,
+          bookingCode: b.booking_code || `DNJ-2026-${b.id + 10000}`,
+          bookingDate: b.booking_date,
+          customerName: b.customer_name,     
+          customerPhone: b.whatsapp_number,  
+          customerEmail: b.email,
+          serviceType: serviceName, // Menggunakan nama paket yang sudah rapi
+          status: b.status || 'CONFIRMED',
+          totalPrice: b.total_price || (b.service?.includes('int') ? 59000000 : 10500000)
+        };
+      });
+
+      // Masukkan data yang sudah dirapikan ke dalam tabel
+      setBookings(mappedData);
     } catch (err) {
-      console.error(err);
+      console.error("Gagal mengambil data dari Laravel:", err);
     }
   };
 
   useEffect(() => {
     loadBookings();
-    // listening to localStorage updates (if any)
-    const handleStorageChange = () => loadBookings();
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   // Demo passcodes
@@ -50,28 +70,51 @@ export default function StaffDashboard() {
   };
 
   // Status updates mapping to storage
-  const updateStatus = (id: string, newStatus: Booking['status']) => {
-    const updated = bookings.map(b => {
-      if (b.id === id) {
-        return { ...b, status: newStatus };
+  // Mengupdate status booking langsung ke database MySQL Laravel
+  const updateStatus = async (id: string, newStatus: Booking['status']) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/bookings/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus.toLowerCase() }) // Mengirim 'confirmed' atau 'completed' ke DB
+      });
+
+      if (response.ok) {
+        // Update state lokal agar tampilan web langsung berubah instan
+        setBookings(prev => prev.map(b => b.id === id ? { ...b, status: newStatus } : b));
+      } else {
+        alert('Gagal memperbarui status di server.');
       }
-      return b;
-    });
-    setBookings(updated);
-    localStorage.setItem('darunnajah_bookings', JSON.stringify(updated));
+    } catch (err) {
+      console.error(err);
+      alert('Terjadi gangguan jaringan backend.');
+    }
   };
 
   // Permanently delete target rows
-  const deleteBooking = (id: string) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus catatan pemesanan ini secara permanen dari sistem?')) {
-      const filtered = bookings.filter(b => b.id !== id);
-      setBookings(filtered);
-      localStorage.setItem('darunnajah_bookings', JSON.stringify(filtered));
+// Menghapus catatan booking secara permanen dari database
+  const deleteBooking = async (id: string) => {
+    if (window.confirm('Apakah Anda yakin ingin menghapus catatan pemesanan ini secara permanen dari database?')) {
+      try {
+        const response = await fetch(`http://localhost:8000/api/bookings/${id}`, {
+          method: 'DELETE'
+        });
+        if (response.ok) {
+          setBookings(prev => prev.filter(b => b.id !== id));
+        } else {
+          alert('Gagal menghapus data dari server.');
+        }
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 
   // Filter application
-  const filteredBookings = bookings.filter(b => {
+  // Jika data dari database masih kosong, jangan tampilkan data contoh bawaan template!
+const dataUntukDiFilter = bookings.length > 0 ? bookings : [];
+
+const filteredBookings = dataUntukDiFilter.filter(b => {
     const matchesSearch = 
       b.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || 
       b.bookingCode.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -121,62 +164,7 @@ export default function StaffDashboard() {
     document.body.removeChild(link);
   };
 
-  // Pre-populate system storage with realistic orders for a full operational appearance
-  const injectSampleBookings = () => {
-    const sample: Booking[] = [
-      {
-        id: 'sample-1',
-        bookingCode: 'DNJ-2026-88012',
-        customerName: 'Muhammad Harisanto',
-        customerPhone: '081288273615',
-        customerEmail: 'harisanto99@gmail.com',
-        serviceType: 'package',
-        serviceId: 'int-1',
-        serviceName: 'Umroh Syawal Barokah Exclusive (9 Hari)',
-        bookingDate: '2026-07-15',
-        passengersOrDuration: 2,
-        totalPrice: 59000000,
-        status: 'Confirmed',
-        createdAt: new Date(Date.now() - 43200000 * 2).toISOString(),
-        notes: 'Butuh katering menu ramah lansia'
-      },
-      {
-        id: 'sample-2',
-        bookingCode: 'DNJ-2026-10224',
-        customerName: 'Siti Sarah Ulujami',
-        customerPhone: '085718102922',
-        customerEmail: 'siti.sarah.dn@sekolah.sch.id',
-        serviceType: 'rentcar',
-        serviceId: 'fleet-1',
-        serviceName: 'PO Darunnajah Luxury Big Bus (59 Kursi)',
-        bookingDate: '2026-08-20',
-        passengersOrDuration: 3,
-        totalPrice: 10500000,
-        status: 'Pending',
-        createdAt: new Date(Date.now() - 15000000).toISOString(),
-        notes: 'Keberangkatan pagi jam 06:00 dari mesjid pesantren'
-      },
-      {
-        id: 'sample-3',
-        bookingCode: 'DNJ-2026-44122',
-        customerName: 'Bryan Mckenzie',
-        customerPhone: '087711200293',
-        customerEmail: 'bryan.consult@office.us',
-        serviceType: 'visa_itas',
-        serviceId: 'doc-2',
-        serviceName: 'Pengurusan ITAS (Izin Tinggal Terbatas)',
-        bookingDate: '2026-06-30',
-        passengersOrDuration: 1,
-        totalPrice: 8500000,
-        status: 'Completed',
-        createdAt: new Date(Date.now() - 43200000 * 5).toISOString(),
-        notes: 'Sponsor PT Darunnajah Utama'
-      }
-    ];
-
-    localStorage.setItem('darunnajah_bookings', JSON.stringify(sample));
-    setBookings(sample);
-  };
+  
 
   // Screen Gate: Ask for simple PIN to log in
   if (!authorized) {
@@ -268,14 +256,6 @@ export default function StaffDashboard() {
             >
               <RefreshCw className="h-4 w-4" />
             </button>
-            {bookings.length === 0 && (
-              <button
-                onClick={injectSampleBookings}
-                className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-emerald-950 font-bold rounded-xl text-xs transition-all"
-              >
-                Gunakan Data Simulasi Kantor
-              </button>
-            )}
           </div>
         </div>
 
@@ -405,8 +385,9 @@ export default function StaffDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-emerald-50 text-xs text-emerald-950">
-                  {filteredBookings.map((b) => (
-                    <tr key={b.id} className="hover:bg-emerald-50/50 transition-colors">
+                  {filteredBookings.map((b: any) => {
+                    return (
+        <tr key={b.id} className="hover:bg-emerald-50/50 transition-colors">
                       {/* Code/Date column */}
                       <td className="p-4">
                         <div className="font-bold text-emerald-950 font-mono flex items-center gap-1">
@@ -499,7 +480,7 @@ export default function StaffDashboard() {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                 )})}
                 </tbody>
               </table>
             </div>

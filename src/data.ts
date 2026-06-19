@@ -8,14 +8,14 @@ import { TravelPackage, BusFleet, DocumentService, FAQItem } from './types';
 export const DOMESTIC_PACKAGES: TravelPackage[] = [
   {
     id: 'dom-1',
-    title: 'Pesona Dewata Bali Classic',
+    title: 'Pulau Karimun Jawa dan City Tor Semarang 2-6 Juli 2026',
     category: 'domestic',
-    duration: '4 Hari 3 Malam',
-    pricePerPax: 3250000,
-    description: 'Rasakan keindahan pulau Bali secara eksklusif dengan kenyamanan armada bus pariwisata premium Darunnajah. Perjalanan meliputi Bedugul, Kuta, Ubud, hingga tebing Uluwatu.',
-    image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80',
-    highlights: ['Pura Ulun Danu Bedugul', 'Sunset Dinner Pantai Jimbaran', 'Tari Kecak Uluwatu', 'Desa Panglipuran'],
-    includes: ['Transportasi Bus Pariwisata AC', 'Hotel Bintang 3', 'Makan sesuai program', 'Tiket masuk wisata', 'Tour Leader & Dokumentasi']
+    duration: '5 Hari 4 Malam',
+    pricePerPax: 1999000,
+    description: 'Menikmati Indahnya Pulau Karimun Jawa & City Tour Semarang',
+    image: '/assets/foto-karimun.jpeg',
+    highlights: ['Bukit Love', 'Pantai Boby', 'Pantai Tanjug Gepam', 'Snorkeling One Day Full', 'Tour Island Hopping (Pulau Menjangan, Cemara Dll)', 'Pulau Menjangan Kecil', 'Pulau Cemara Kecil', 'Nemo Sport'],
+    includes: ['Transportasi Bus Pariwisata AC', 'Hotel Bintang 3', 'Makan sesuai program', 'Tiket masuk wisata', 'Tour Leader & Dokumentasi', 'Penyebrangan Kapal Jepara-Krimun Jawa']
   },
   {
     id: 'dom-2',
@@ -28,63 +28,52 @@ export const DOMESTIC_PACKAGES: TravelPackage[] = [
     highlights: ['Golden Sunrise Bromo', 'Kawah Bromo & Pasir Berbisik', 'Museum Angkut Batu', 'Wisata Petik Apel Selecta'],
     includes: ['Jeep 4x4 Bromo', 'Sewa Bus PO Darunnajah', 'Hotel Premium', 'Makan 3x Sehari', 'Guide Lokal Berpengalaman']
   },
-  {
-    id: 'dom-3',
-    title: 'Heritage Yogyakarta & Borobudur Cultural',
-    category: 'domestic',
-    duration: '3 Hari 2 Malam',
-    pricePerPax: 1850000,
-    description: 'Menelusuri sejarah kebudayaan Jawa yang adiluhung mulai dari Candi Borobudur yang megah, Keraton Yogyakarta, pusat kerajinan perak Kotagede, hingga belanja di Malioboro.',
-    image: 'https://images.unsplash.com/photo-1584810359583-96fc3448beaa?auto=format&fit=crop&w=800&q=80',
-    highlights: ['Candi Borobudur & Prambanan', 'Keraton Yogyakarta', 'Lava Tour Merapi Jip', 'Belanja Malioboro'],
-    includes: ['Bus Pariwisata Eksekutif', 'Akomodasi Hotel Nyaman', 'Tiket masuk Candi (Pelataran)', 'Snack & Air Mineral', 'Lokal Guide Keraton']
-  },
-  {
-    id: 'dom-4',
-    title: 'Surga Kepulauan Karimunjawa Marine',
-    category: 'domestic',
-    duration: '3 Hari 2 Malam',
-    pricePerPax: 2450000,
-    description: 'Jelajahi keindahan bawah laut pulau Karimunjawa dengan terumbu karang yang eksotik, pulau pasir putih yang sunyi, dan penangkaran hiu yang menegangkan.',
-    image: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80',
-    highlights: ['Snorkeling Pulau Menjangan', 'Penangkaran Hiu', 'Sunset Tanjung Gelam', 'Bakar Ikan Segar di Pulau'],
-    includes: ['Kapal Express Bahari AC JNE', 'Homestay / Resort AC', 'Makan prasmanan (Seafood)', 'Sewa alat snorkeling lengkap', 'Guide HPI Karimunjawa']
-  }
 ];
 
 export const INTERNATIONAL_PACKAGES: TravelPackage[] = [
   {
     id: 'int-1',
-    title: 'Umroh Syawal Barokah Exclusive',
+    title: 'Umroh Plus Cairo Alexandria 12 November 2026',
     category: 'international',
-    duration: '9 Hari',
-    pricePerPax: 29500000,
-    description: 'Ibadah Umroh khusyuk bersama Darunnajah Travel yang telah berizin resmi PPIU dari Kemenag RI. Dilayani pembimbing ibadah (Muthawwif) berkompeten serta hotel dekat Masjidil Haram.',
-    image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=800&q=80',
-    highlights: ['Bimbingan Manasik Intensif', 'Ziarah Kota Makkah & Madinah', 'Kajian Rohani Rutin', 'Air Zam-Zam (Jika Diizinkan)'],
-    includes: ['Tiket Pesawat Saudia Airlines PP', 'Visa Umroh Berizin Resmi', 'Hotel Bintang 5 / 4', 'Makan 3x menu Indonesia', 'Muthawwif Profesional']
+    duration: '13 Hari 10 Malam',
+    pricePerPax: 39733136,
+    description: 'Saatnya menyempurnakan ibadah umroh sekaligus menapaki jejak sejarah Islam di Mesir. Program ini membawa anda menuju Tanah Suci, Cairo, Alexandria, Old Coty Jeddah, hingga pengalaman istimewa Dinner Nile Cruise.',
+    image: '/assets/foto-umroh.jpeg',
+    highlights: ['Bimbingan Manasik Intensif', 'Ziarah Kota Makkah & Madinah', 'Air Zam-Zam', 'City Tour Cairo', 'City Tour Alexandria', 'Old City Jeddah', 'Dinner Nile Cruise', 'Museum Mummy', 'Kereta Cepat', 'Ayam Albaik', 'Perlengkapan Umroh Lengkap'],
+    includes: ['Tiket Pesawat EgptAir', 'Visa Umroh Berizin Resmi', 'Hotel Cairo 3 Malam (Tiba Pyramid)', 'Hotel Madinah 3 Malam (Jaeharat Al Rasyid)', 'Hotel Makkah 4 Malam (Maysan Al Maqam)', 'Makan 3x menu Indonesia', 'Muthawwif Profesional']
   },
   {
     id: 'int-2',
-    title: 'Duo Negara ASEAN: Malaysia & Singapura',
+    title: 'Asian Youth Model United Nations ke 22, 21-24 Agustus 2026  ',
     category: 'international',
     duration: '4 Hari 3 Malam',
-    pricePerPax: 5900000,
-    description: 'Nikmati perpaduan modernitas Singapura dan nuansa budaya Malaysia. Sangat cocok untuk liburan keluarga atau grup instansi pendidikan.',
-    image: 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?auto=format&fit=crop&w=800&q=80',
-    highlights: ['Merlion Park & Marina Bay Sands', 'Universal Studios (Photo)', 'Petronas Twin Towers KL', 'Batu Caves & Genting Highlands'],
-    includes: ['Tiket Pesawat PP Jakarta', 'Sewa Bus Pariwisata AC Malaysia-SG', 'Hotel Bintang 3 Eksklusif', 'Tiket Wisata & Retribusi', 'Tour Leader dari Indonesia']
+    pricePerPax: 22900000,
+    description: 'Sebuah kesempatan emas untuk mengikuti simulasi sidang PBB tingkat Internasional dengan tema : Diplomasi dalam Kesulitan "Mengarahkan Dunia Melalui Krisis dan Perubahan".',
+    image: '/assets/foto-aymun.jpeg',
+    highlights: ['Dibuka untuk umum usia 11-25 th'],
+    includes: ['Tiket Pesawat PP', 'Ground Hamdling di Bandara Soekarno Hatta PP', 'Hotel Bintang 5', 'City Tour', 'E-book MUN', 'Tools Kits (t-shirt, notepad, stiker', 'Secretary General dari Portugal', 'Penjeoutan Peserta dari bandara di Kuala lumpur ke hotel PP', '40 video MUN', '10X Offline Coaching', '2x Coffe Break & 1x Lumch', 'Board of Dais (Pimpinan Sidang) yang datang dari berbagai negara', 'Scoring Matrix', 'Dokumentasi on Event', 'International Sertifikat', 'Meals setiap hari selama mengikuti acara', 'Gala Dinner saat Opening & Closing Ceremony', 'Video General Speaker List saat anak Speach']
   },
   {
     id: 'int-3',
-    title: 'Pesona Klasik Turki & Cappadocia',
+    title: 'ASEAN SCETRO KE 7, Oktober 2026',
     category: 'international',
-    duration: '10 Hari 8 Malam',
-    pricePerPax: 14900000,
-    description: 'Jelajahi saksi bisu kejayaan Islam di Istanbul dan nikmati pemandangan ikonik balon udara di lembah bebatuan Cappadocia yang legendaris.',
-    image: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=800&q=80',
-    highlights: ['Hagia Sophia & Blue Mosque', 'Hot Air Balloon Cappadocia', 'Pamukkale Cotton Castle', 'Bosphorus Cruise'],
-    includes: ['Tiket Pesawat Full Service PP', 'Hotel Gua Unik / Bintang 4', 'Sewa Luxury Coach Turkiye', 'Visa Masuk Turki', 'Tour Guide Lokal Berbahasa Indonesia']
+    duration: '14 Hari 13 Malam',
+    pricePerPax: 27750000,
+    description: 'Nikmati keseruan edukasi kepramukaan keliling 5 negara (Vietnam, Laoss, Thailand, Malaysia, Singapore, Indonesia).',
+    image: '/assets/foto-asean-scetro.jpeg',
+    highlights: ['Kunjungan ke Perwakilan/Kedutaan/Konsulat Jendral Indonesia di Negara Tujuan', 'Kunjungan ke Biro-biro Keperamukaan (NSO) dibeberapa negara tujuan', 'Kunjungan ke Sekolah/Universitas unggulan dan pembesar negara setempat', 'Penampilan keterampilan kepramukaan dan seni nusantara', 'Kunjungan objek wisata dan berbelanja disetiap negara'],
+    includes: ['Tiket Pesawat : Jakarta - Hanoi Vietnam & Batam - Jakarta', 'Tiket Penyebrangan Jet Foil Setulang Laut Johor Bahru -  Batam Center', 'Bus Pariwisata selama kegiatan', 'Hotel', 'Tiket Wisata', 'Tour Leader & Tips Supir', 'Makan 3x sehari']
+  },
+   {
+    id: 'int-4',
+    title: 'Umroh Plus Cairo Alexandria 24 Desember 2026',
+    category: 'international',
+    duration: '13 Hari 10 Malam',
+    pricePerPax: 39733136,
+    description: 'Saatnya menyempurnakan ibadah umroh sekaligus menapaki jejak sejarah Islam di Mesir. Program ini membawa anda menuju Tanah Suci, Cairo, Alexandria, Old Coty Jeddah, hingga pengalaman istimewa Dinner Nile Cruise.',
+    image: '/assets/foto-umroh.jpeg',
+    highlights: ['Bimbingan Manasik Intensif', 'Ziarah Kota Makkah & Madinah', 'Air Zam-Zam', 'City Tour Cairo', 'City Tour Alexandria', 'Old City Jeddah', 'Dinner Nile Cruise', 'Museum Mummy', 'Kereta Cepat', 'Ayam Albaik', 'Perlengkapan Umroh Lengkap'],
+    includes: ['Tiket Pesawat EgptAir', 'Visa Umroh Berizin Resmi', 'Hotel Cairo 3 Malam (Tiba Pyramid)', 'Hotel Madinah 3 Malam (Jaeharat Al Rasyid)', 'Hotel Makkah 4 Malam (Maysan Al Maqam)', 'Makan 3x menu Indonesia', 'Muthawwif Profesional']
   }
 ];
 

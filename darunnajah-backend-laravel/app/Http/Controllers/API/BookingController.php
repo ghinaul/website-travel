@@ -8,16 +8,24 @@ use App\Models\Booking;
 
 class BookingController extends Controller
 {
+    // 1. Fungsi INDEX untuk mengambil semua data dari database
+    public function index()
+    {
+        $bookings = Booking::all();
+        return response()->json($bookings);
+    }
+
+    // 2. Fungsi STORE bawaan kamu untuk menyimpan data pendaftaran
     public function store(Request $request)
     {
         // 1. Validasi semua data dari form React agar sesuai dengan Model & Database
         $validated = $request->validate([
-            'customer_name'   => 'required|string|max:255',
-            'email'           => 'required|email',
-            'whatsapp_number' => 'required|string',
-            'booking_date'    => 'required|string', 
-            'service'         => 'required|string',
-            'participants'    => 'required|integer',
+            'customer_name'  => 'required|string|max:255',
+            'email'          => 'required|email',
+            'whatsapp_number'=> 'required|string',
+            'booking_date'   => 'required|string',
+            'service'        => 'required|string',
+            'participants'   => 'required|integer',
         ]);
 
         // 2. Simpan data ke dalam tabel bookings

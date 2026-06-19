@@ -85,12 +85,14 @@ export default function Catalog({ onSelectItem, activeTab: propActiveTab, setAct
                   <div key={pkg.id} className="bg-white rounded-3xl overflow-hidden border border-slate-100/90 shadow-[0_4px_30px_rgba(4,47,26,0.02)] hover:shadow-[0_12px_40px_rgba(4,47,26,0.08)] hover:border-emerald-500/10 transition-all duration-300 flex flex-col h-full group" id={`pkg-card-${pkg.id}`}>
                     {/* Cover image with category badge */}
                     <div className="relative h-56 overflow-hidden bg-emerald-950">
+                    <a href={pkg.image} target="_blank" rel="noopener noreferrer" className="block cursor-pointer overflow-hidden">  
                       <img
                         src={pkg.image}
                         alt={pkg.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         referrerPolicy="no-referrer"
                       />
+                      </a>
                       <div className="absolute top-4 left-4 bg-emerald-950/90 text-amber-400 text-[9px] font-black px-3 py-1 rounded-lg uppercase tracking-wider border border-emerald-800 backdrop-blur-sm">
                         {pkg.category === 'domestic' ? 'Domestik' : 'Luar Negeri / Internasional'}
                       </div>
@@ -121,6 +123,18 @@ export default function Catalog({ onSelectItem, activeTab: propActiveTab, setAct
                             ))}
                           </ul>
                         </div>
+                        {/* Includes / Fasilitas */}
+                      <div className="mb-4 pt-2 border-t border-dashed border-gray-100">
+                        <span className="text-[11px] font-extrabold text-emerald-900 uppercase tracking-widest block mb-2">Fasilitas Termasuk:</span>
+                         <ul className="space-y-1.5">
+                           {pkg.includes && pkg.includes.map((inc, i) => (
+                            <li key={i} className="text-xs text-emerald-800 flex items-center gap-2">
+                              <Check className="h-3 w-3 text-emerald-600 shrink-0" />
+                             <span className="truncate">{inc}</span>
+                           </li>
+                         ))}
+                       </ul>
+                      </div>
                       </div>
 
                       {/* Pricing & Booking Trigger */}
@@ -197,7 +211,7 @@ export default function Catalog({ onSelectItem, activeTab: propActiveTab, setAct
                       {/* Pricing & Booking */}
                       <div className="border-t border-emerald-50 pt-4 mt-6">
                         <div className="flex items-baseline justify-between mb-4">
-                          <span className="text-xs text-emerald-700 font-semibold uppercase">Sewa / Hari</span>
+                          <span className="text-xs text-emerald-700 font-semibold uppercase">Mulai Dari</span>
                           <span className="text-lg font-extrabold text-emerald-950">
                             {formatIDR(fleet.pricePerDay)}<span className="text-xs text-emerald-800/80 font-normal">/Hari</span>
                           </span>
