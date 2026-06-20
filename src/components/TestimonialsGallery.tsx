@@ -30,57 +30,93 @@ interface TestimonialItem {
 const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: 'gal-1',
-    title: 'Keberangkatan Rombongan Umroh Syawal',
-    category: 'umrah',
-    year: '2025',
-    location: 'Bandara Soekarno Hatta - Madinah',
-    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80',
-    description: 'Pelepasan 120 jamaah Umroh Syawal PT Darunnajah Zahra Utama bersama pembimbing ibadah ustaz bersertifikat.'
+    title: 'Sosial Cultural Visit Pimpinan Pesantren ke Australia',
+    category: 'domestic', // international but group tour
+    year: '2018',
+    location: 'Australia',
+    image: '/assets/foto-scv-australia-2018.jpeg',
+    description: 'Keberangkatan Sosial Cultural Visit Pimpinan Pesantren ke Australia.'
   },
   {
     id: 'gal-2',
-    title: 'Tour Edukasi Pesantren di Genting Highlands',
+    title: 'Sosial Cultural Visit Turkey ke-1',
     category: 'domestic', // international but group tour
-    year: '2024',
-    location: 'Malaysia - Singapura',
-    image: 'https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=800&q=80',
-    description: 'Dokumentasi perjalanan studi banding dan rekreasi santri Darunnajah ke Malaysia dan Singapura menggunakan bus eksekutif.'
+    year: '2021',
+    location: 'Turkey',
+    image: '/assets/foto-scv-turki1-2021.png',
+    description: 'Menapak tilas sejarah peradaban Islam di Hagia Sophia dan dokumentasi perjalanan studi banding dan rekreasi santri Darunnajah ke Turkey.'
   },
   {
     id: 'gal-3',
-    title: 'Keseruan Tour Gathering BUMN di Bali',
-    category: 'domestic',
-    year: '2024',
-    location: 'Jimbaran & Uluwatu, Bali',
-    image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80',
-    description: 'Layanan terpadu transportasi Bus Luxury PO Darunnajah selama 4 hari penuh mengeksplorasi destinasi eksotis Bali.'
+    title: 'Sosial Cultural Visit Turkey ke-2',
+    category: 'domestic', // international but group tour
+    year: '2021',
+    location: 'Turkey',
+    image: '/assets/foto-scv-turki2-2021.png',
+    description: 'Menapak tilas sejarah peradaban Islam di Hagia Sophia dan dokumentasi perjalanan studi banding dan rekreasi santri Darunnajah ke Turkey.'
   },
   {
     id: 'gal-4',
+    title: 'Sosial Cultural Visit Turkey ke-3',
+    category: 'domestic', // international but group tour
+    year: '2022',
+    location: 'Turkey',
+    image: '/assets/foto-scv-turki3-2022.png',
+    description: 'Menapak tilas sejarah peradaban Islam di Hagia Sophia dan dokumentasi perjalanan studi banding dan rekreasi santri Darunnajah ke Turkey.'
+  },
+  {
+    id: 'gal-5',
+    title: 'Sosial Cultural Visit Turkey ke-4',
+    category: 'domestic', // international but group tour
+    year: '2022',
+    location: 'Turkey',
+    image: '/assets/foto-scv-turki4-2022.jpg',
+    description: 'Menapak tilas sejarah peradaban Islam di Hagia Sophia dan dokumentasi perjalanan studi banding dan rekreasi santri Darunnajah ke Turkey.'
+  },
+  {
+    id: 'gal-6',
+    title: 'Edu Cultural Singapore - Malayasia',
+    category: 'domestic', // international but group tour
+    year: '2023',
+    location: 'Singapore - Malayasia',
+    image: '/assets/foto-sigmal-2023.jpeg',
+    description: 'Menapak tilas sejarah peradaban Islam di Hagia Sophia dan dokumentasi perjalanan studi banding dan rekreasi santri Darunnajah ke Turkey.'
+  },
+  {
+    id: 'gal-7',
+    title: 'Dauroh Ummul Qura Santri ke-6',
+    category: 'domestic', // international but group tour
+    year: '2023',
+    location: 'Meekkah - Madinah',
+    image: '/assets/foto-duq6-2023.jpg',
+    description: 'Belajar bahasa arab selama 1 bulan di Mekkah plus umroh.'
+  },
+  {
+    id: 'gal-8',
+    title: 'Sosial Cultural Visit ke Jepang',
+    category: 'domestic', // international but group tour
+    year: '2024',
+    location: 'Osaka',
+    image: '/assets/foto-scv-jepang-2024.jpeg',
+    description: 'Meniikmati keseruan edukasi kepramukaan keliling 5 negara (Vietnam, Laoss, Thailand, Malaysia, Singapore, Indonesia).'
+  },
+  {
+    id: 'gal-9',
+    title: 'Asean Scetro ke 5',
+    category: 'domestic', // international but group tour
+    year: '2024',
+    location: 'Singapore - Malayasia - Thailand - Laos - Vietnam',
+    image: '/assets/foto-asean-scetro5-2024.jpg',
+    description: 'Meniikmati keseruan edukasi kepramukaan keliling 5 negara (Vietnam, Laoss, Thailand, Malaysia, Singapore, Indonesia).'
+  },
+  {
+    id: 'gal-10',
     title: 'Konvoi Armada Big Bus Luxury di Tol Cipali',
     category: 'bus',
     year: '2025',
     location: 'Tol Trans Jawa',
     image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80',
     description: 'Iring-iringan 3 unit Mercedes-Benz Big Bus PO Darunnajah mengantarkan rombongan ziarah Wali Songo Jawa Tengah.'
-  },
-  {
-    id: 'gal-5',
-    title: 'Ziarah & City Tour di Hagia Sophia',
-    category: 'umrah', // includes turkey tour
-    year: '2025',
-    location: 'Istanbul, Turki',
-    image: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=800&q=80',
-    description: 'Menapak tilas sejarah peradaban Islam di Hagia Sophia dalam rangkaian program Umroh Plus Turki.'
-  },
-  {
-    id: 'gal-6',
-    title: 'Aktivitas Offroad Lava Tour Merapi Yogyakarta',
-    category: 'domestic',
-    year: '2024',
-    location: 'Sleman, Yogyakarta',
-    image: 'https://images.unsplash.com/photo-1584810359583-96fc3448beaa?auto=format&fit=crop&w=800&q=80',
-    description: 'Petualangan seru para peserta rombongan darmawisata sekolah di destinasi lereng Gunung Merapi.'
   }
 ];
 

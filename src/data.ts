@@ -8,7 +8,7 @@ import { TravelPackage, BusFleet, DocumentService, FAQItem } from './types';
 export const DOMESTIC_PACKAGES: TravelPackage[] = [
   {
     id: 'dom-1',
-    title: 'Pulau Karimun Jawa dan City Tor Semarang 2-6 Juli 2026',
+    title: 'Pulau Karimun Jawa dan City Tor Semarang "2-6 Juli 2026"',
     category: 'domestic',
     duration: '5 Hari 4 Malam',
     pricePerPax: 1999000,
@@ -16,24 +16,13 @@ export const DOMESTIC_PACKAGES: TravelPackage[] = [
     image: '/assets/foto-karimun.jpeg',
     highlights: ['Bukit Love', 'Pantai Boby', 'Pantai Tanjug Gepam', 'Snorkeling One Day Full', 'Tour Island Hopping (Pulau Menjangan, Cemara Dll)', 'Pulau Menjangan Kecil', 'Pulau Cemara Kecil', 'Nemo Sport'],
     includes: ['Transportasi Bus Pariwisata AC', 'Hotel Bintang 3', 'Makan sesuai program', 'Tiket masuk wisata', 'Tour Leader & Dokumentasi', 'Penyebrangan Kapal Jepara-Krimun Jawa']
-  },
-  {
-    id: 'dom-2',
-    title: 'Eksotisme Bromo & Malang Spektakuler',
-    category: 'domestic',
-    duration: '3 Hari 2 Malam',
-    pricePerPax: 2150000,
-    description: 'Petualangan berburu matahari terbit tercantik di Gunung Bromo dikombinasikan dengan wisata petik apel dan rekreasi keluarga di Kota Batu, Malang yang sejuk.',
-    image: 'https://images.unsplash.com/photo-1602002418082-a4443e081dd1?auto=format&fit=crop&w=800&q=80',
-    highlights: ['Golden Sunrise Bromo', 'Kawah Bromo & Pasir Berbisik', 'Museum Angkut Batu', 'Wisata Petik Apel Selecta'],
-    includes: ['Jeep 4x4 Bromo', 'Sewa Bus PO Darunnajah', 'Hotel Premium', 'Makan 3x Sehari', 'Guide Lokal Berpengalaman']
-  },
+  }
 ];
 
 export const INTERNATIONAL_PACKAGES: TravelPackage[] = [
   {
     id: 'int-1',
-    title: 'Umroh Plus Cairo Alexandria 12 November 2026',
+    title: 'Umroh Plus Cairo Alexandria "12 November 2026"',
     category: 'international',
     duration: '13 Hari 10 Malam',
     pricePerPax: 39733136,
@@ -44,7 +33,7 @@ export const INTERNATIONAL_PACKAGES: TravelPackage[] = [
   },
   {
     id: 'int-2',
-    title: 'Asian Youth Model United Nations ke 22, 21-24 Agustus 2026  ',
+    title: 'Asian Youth Model United Nations ke 22 "21-24 Agustus 2026"',
     category: 'international',
     duration: '4 Hari 3 Malam',
     pricePerPax: 22900000,
@@ -55,7 +44,7 @@ export const INTERNATIONAL_PACKAGES: TravelPackage[] = [
   },
   {
     id: 'int-3',
-    title: 'ASEAN SCETRO KE 7, Oktober 2026',
+    title: 'ASEAN SCETRO KE 7 "Oktober 2026"',
     category: 'international',
     duration: '14 Hari 13 Malam',
     pricePerPax: 27750000,
@@ -66,7 +55,7 @@ export const INTERNATIONAL_PACKAGES: TravelPackage[] = [
   },
    {
     id: 'int-4',
-    title: 'Umroh Plus Cairo Alexandria 24 Desember 2026',
+    title: 'Umroh Plus Cairo Alexandria "24 Desember 2026"',
     category: 'international',
     duration: '13 Hari 10 Malam',
     pricePerPax: 39733136,
@@ -80,33 +69,63 @@ export const INTERNATIONAL_PACKAGES: TravelPackage[] = [
 export const BUS_FLEET: BusFleet[] = [
   {
     id: 'fleet-1',
-    name: 'PO Darunnajah Luxury Big Bus',
-    type: 'bigbus',
-    capacity: 59,
+    name: 'PO Darunnajah Hiace',
+    type: 'minivan',
+    capacity: 13/14,
     pricePerDay: 3500000,
     features: ['Full AC Dual Blower', 'Premium Audio, Karaoke & TV LCD', 'Reclining Seat 2-3 Configuration', 'USB Charger Port di Setiap Kursi', 'Ruang Bagasi Super Luas', 'Sopir & Kru Ramah Berpengalaman'],
-    image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80',
+    image: '/assets/foto-hiace.jpeg',
     description: 'Armada premium Mercedes-Benz / Hino dengan suspensi udara yang empuk, menjamin kenyamanan maksimal untuk rombongan instansi, sekolah, pesantren, maupun keluarga besar.'
   },
   {
     id: 'fleet-2',
     name: 'PO Darunnajah Executive Medium Bus',
     type: 'mediumbus',
-    capacity: 31,
-    pricePerDay: 2200000,
+    capacity: 33/35,
+    pricePerDay: 1700000,
     features: ['Cooling AC Dingin Merata', 'Karaoke System & LCD Screen', 'Reclining Seat 2-2 Configuration', 'Port Pengisi Daya USB', 'P3K & Palu Pemecah Kaca darurat', 'Kabin bersih wangi bebas asap rokok'],
-    image: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?auto=format&fit=crop&w=800&q=80',
+    image: '/assets/foto-bus-medium.jpeg',
     description: 'Sangat ideal untuk rombongan kelas menengah yang membutuhkan fleksibilitas rute dalam kota Jakarta yang dinamis maupun luar kota dengan kenyamanan kabin berkelas.'
   },
   {
     id: 'fleet-3',
-    name: 'Toyota HiAce Premio Luxury',
+    name: 'BYD M6',
     type: 'minivan',
-    capacity: 14,
-    pricePerDay: 1400000,
+    capacity: 5,
+    pricePerDay: 750000,
+    features: ['Executive Captain Seats', 'Double Blower AC Dan Dingin', 'Full Sound System & Bluetooth Audio', 'Sopir Santun & Profesional'],
+    image: '/assets/foto-byd-m6.jpg',
+    description: 'Kendaraan premium dengan performa tangguh khas Toyota. Memberikan kestabilan dan kemewahan sekelas sedan untuk keluarga kecil atau tim bisnis.'
+  },
+  {
+    id: 'fleet-4',
+    name: 'Toyota Vellfire',
+    type: 'minivan',
+    capacity: 6,
+    pricePerDay: 3000000,
     features: ['Executive Captain Seats', 'Double Blower AC Dan Dingin', 'Full Sound System & Bluetooth Audio', 'Pintu Geser Ergonomis', 'Sopir Santun & Profesional'],
-    image: 'https://images.unsplash.com/photo-1621007947382-cc34aa864ee3?auto=format&fit=crop&w=800&q=80',
-    description: 'Kendaraan microbus premium dengan performa tangguh khas Toyota. Memberikan kestabilan dan kemewahan sekelas sedan untuk keluarga kecil atau tim bisnis.'
+    image: '/assets/foto-vellfire.jpg',
+    description: 'Kendaraan premium dengan performa tangguh khas Toyota. Memberikan kestabilan dan kemewahan sekelas sedan untuk keluarga kecil atau tim bisnis.'
+  },
+  {
+    id: 'fleet-5',
+    name: 'Inova Reborn',
+    type: 'minivan',
+    capacity: 5,
+    pricePerDay: 750000,
+    features: ['Executive Captain Seats', 'Double Blower AC Dan Dingin', 'Full Sound System & Bluetooth Audio', 'Sopir Santun & Profesional'],
+    image: '/assets/foto-inova-reborn.jpg',
+    description: 'Kendaraan  premium dengan performa tangguh. Memberikan kestabilan dan kemewahan sekelas sedan untuk keluarga kecil atau tim bisnis.'
+  },
+  {
+    id: 'fleet-6',
+    name: 'Denza D9',
+    type: 'minivan',
+    capacity: 6,
+    pricePerDay: 2500000,
+    features: ['Executive Captain Seats', 'Double Blower AC Dan Dingin', 'Full Sound System & Bluetooth Audio', 'Pintu Geser Ergonomis', 'Sopir Santun & Profesional'],
+    image: '/assets/foto-denza-d9.jpg',
+    description: 'Kendaraan premium dengan performa tangguh. Memberikan kestabilan dan kemewahan sekelas sedan untuk keluarga kecil atau tim bisnis.'
   }
 ];
 
