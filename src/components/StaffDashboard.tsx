@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Booking } from '../types';
 
+
 export default function StaffDashboard() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -72,24 +73,27 @@ const loadBookings = async () => {
   // Status updates mapping to storage
   // Mengupdate status booking langsung ke database MySQL Laravel
   const updateStatus = async (id: string, newStatus: Booking['status']) => {
-    try {
-      const response = await fetch(`http://localhost:8000/api/bookings/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus.toLowerCase() }) // Mengirim 'confirmed' atau 'completed' ke DB
-      });
+  try {
+    const cleanId = id.toString().split(':')[0];
 
-      if (response.ok) {
-        // Update state lokal agar tampilan web langsung berubah instan
-        setBookings(prev => prev.map(b => b.id === id ? { ...b, status: newStatus } : b));
-      } else {
-        alert('Gagal memperbarui status di server.');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Terjadi gangguan jaringan backend.');
+    const response = await fetch(`http://localhost:8000/api/bookings/${cleanId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ status: newStatus }) // Mengirim langsung Confirmed / Cancelled / Completed sesuai Laravel
+    });
+
+    if (response.ok) {
+      setBookings(prev => prev.map(b => b.id.toString().split(':')[0] === cleanId ? { ...b, status: newStatus } : b));
+    } else {
+      alert('Gagal memperbarui status di server.');
     }
-  };
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Gagal memperbarui status di server.');
+  }
+};
 
   // Permanently delete target rows
 // Menghapus catatan booking secara permanen dari database
@@ -143,27 +147,64 @@ const filteredBookings = dataUntukDiFilter.filter(b => {
     }).format(num);
   };
 
-  // Export to CSV spreadsheet format
-  const handleExportCSV = () => {
+const handleExportPDF = () => {
     if (filteredBookings.length === 0) {
       alert('Tidak ada data pemesanan untuk diekspor.');
       return;
     }
-    const headers = ['Kode Booking,Nama Pemesan,WhatsApp,Email,Jenis Layanan,Nama Layanan,Tanggal Rencana,Pax/Hari,Total Harga,Status,Tanggal Dibuat\n'];
-    const rows = filteredBookings.map(b => {
-      return `"${b.bookingCode}","${b.customerName}","${b.customerPhone}","${b.customerEmail}","${b.serviceType}","${b.serviceName}","${b.bookingDate}",${b.passengersOrDuration},${b.totalPrice},"${b.status}","${b.createdAt}"\n`;
-    });
-    
-    const csvContent = "data:text/csv;charset=utf-8," + headers + rows.join('');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `rekapan-pemesan-darunnajah-${new Date().toISOString().substring(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
+    // Memuat library jspdf secara dinamis agar aman dari eror compiler TypeScript
+    import('jspdf').then((jsPDFModule) => {
+      import('jspdf-autotable').then(() => {
+        const doc = new (jsPDFModule.default || jsPDFModule.jsPDF)({
+          orientation: 'landscape',
+          unit: 'mm',
+          format: 'a4'
+        });
+
+        // 1. Tambahkan Judul Laporan di dalam PDF
+        doc.setFontSize(16);
+        doc.text('DARUNNAJAH TOURS & TRAVEL', 14, 15);
+        doc.setFontSize(12);
+        doc.text('Laporan Rekapan Pendataan Reservasi Dashboard', 14, 22);
+        doc.setFontSize(10);
+        doc.text(`Tanggal Unduh: ${new Date().toLocaleDateString('id-ID')}`, 14, 28);
+
+        // 2. Siapkan Kolom Tabel Laporan
+        const tableColumn = ["Kode Booking", "Data Pemesan", "Layanan & Qty", "Tarif Total", "Status"];
+        const tableRows: any[] = [];
+
+        // 3. Masukkan Data dari State Aplikasi ke Baris Tabel
+        filteredBookings.forEach((booking: any) => {
+          const bookingData = [
+            booking.code || '-',
+            `${booking.customer_name}\n${booking.customer_phone}`,
+            `${booking.service_type || '-'} (${booking.quantity || 1} orang)`,
+            `Rp ${Number(booking.total_price || 0).toLocaleString('id-ID')}`,
+            booking.status || '-'
+          ];
+          tableRows.push(bookingData);
+        });
+
+        // 4. Gambar Tabel Otomatis ke dalam Dokumen PDF
+        (doc as any).autoTable({
+          head: [tableColumn],
+          body: tableRows,
+          startY: 35,
+          theme: 'grid',
+          headStyles: { fillColor: [4, 47, 26] }, // Warna hijau khas Darunnajah
+          styles: { fontSize: 9, cellPadding: 3 }
+        });
+
+        // 5. Perintah Unduh Otomatis Langsung ke Browser
+        const fileName = `rekapan-darunnajah-${new Date().toISOString().substring(0, 10)}.pdf`;
+        doc.save(fileName);
+      });
+    }).catch(err => {
+      console.error("Gagal mengunduh PDF:", err);
+      alert("Terjadi kesalahan sistem saat membuat PDF.");
+    });
+  };
   
 
   // Screen Gate: Ask for simple PIN to log in
@@ -243,12 +284,14 @@ const filteredBookings = dataUntukDiFilter.filter(b => {
 
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={handleExportCSV}
-              className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-800 hover:bg-emerald-950 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer"
-            >
-              <Download className="h-4 w-4" />
-              Ekspor Rekapan (.CSV)
-            </button>
+            onClick={handleExportPDF}
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-800 hover:bg-emerald-950 text-white font-medium rounded-xl text-xs shadow-sm transition-colors print:hidden"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0a2.25 2.25 0 0 1-2.25 2.25H8.59A2.25 2.25 0 0 1 6.34 18m11.318-4.171A2.25 2.25 0 0 0 19.5 11.59V8.514c0-.578-.23-1.134-.64-1.545L16.94 4.75A2.25 2.25 0 0 0 15.393 4H9.171c-.53 0-1.04.21-1.415.585L5.4 6.97A2.25 2.25 0 0 0 4.75 8.514v3.076c0 1.09.738 2.016 1.811 2.214" />
+            </svg>
+            Ekspor Rekapan (.PDF)
+          </button>
             <button
               onClick={loadBookings}
               className="flex items-center justify-center p-2.5 bg-white border border-emerald-100 hover:bg-emerald-50 text-emerald-900 rounded-xl transition-colors shrink-0"

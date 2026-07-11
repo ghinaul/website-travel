@@ -1,131 +1,72 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import React, { useState } from 'react';
-import { Bus, Menu, X, LayoutDashboard, UserCheck, Shield } from 'lucide-react';
-import DarunnajahLogo from './DarunnajahLogo';
+import React from 'react';
+import { LayoutDashboard, Menu, X } from 'lucide-react';
 
 interface NavbarProps {
   isAdminView: boolean;
-  setIsAdminView: (val: boolean) => void;
+  setIsAdminView: (value: boolean) => void;
   onNavigateToBooking: () => void;
-  onNavigateToCatalogTab?: (tabId: 'all' | 'packages' | 'rentcar' | 'docs') => void;
+  onNavigateToCatalogTab: (tab: string) => void;
 }
 
-export default function Navbar({ isAdminView, setIsAdminView, onNavigateToBooking, onNavigateToCatalogTab }: NavbarProps) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const scrollToSection = (id: string, tabId?: 'all' | 'packages' | 'rentcar' | 'docs') => {
-    setIsAdminView(false);
-    setIsOpen(false);
-    
-    if (tabId && onNavigateToCatalogTab) {
-      onNavigateToCatalogTab(tabId);
-    } else {
-      setTimeout(() => {
-        const element = document.getElementById(id);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 100);
-    }
-  };
+export default function Navbar({
+  isAdminView,
+  setIsAdminView,
+  onNavigateToBooking,
+  onNavigateToCatalogTab,
+}: NavbarProps) {
+  const [isOpen, setIsOpen] = React.useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 bg-emerald-950/90 backdrop-blur-xl border-b border-emerald-900 text-white shadow-[0_4px_30px_rgba(4,47,26,0.15)]">
+    <nav className="bg-emerald-950 text-white sticky top-0 z-50 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Logo Brand */}
-          <div className="flex items-center cursor-pointer" onClick={() => scrollToSection('hero')}>
-            <DarunnajahLogo variant="dark" size="sm" />
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => setIsAdminView(false)}>
+            <div className="flex flex-col">
+              <span className="font-bold text-xl tracking-wider text-emerald-50">Darunnajah</span>
+              <span className="text-xs font-semibold tracking-widest text-emerald-400 uppercase">Tours & Travel</span>
+            </div>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-1">
-            <button
-              onClick={() => scrollToSection('hero')}
-              className="px-2 py-1.5 rounded-lg text-xs font-semibold text-emerald-300 hover:text-white hover:bg-emerald-900/60 transition-colors"
-              id="nav-btn-home"
-            >
-              Beranda
-            </button>
-            <button
-              onClick={() => scrollToSection('catalog', 'packages')}
-              className="px-2 py-1.5 rounded-lg text-xs font-semibold text-emerald-300 hover:text-white hover:bg-emerald-900/60 transition-colors"
-              id="nav-btn-packages"
-            >
-              Paket Wisata & Umroh
-            </button>
-            <button
-              onClick={() => scrollToSection('catalog', 'rentcar')}
-              className="px-2 py-1.5 rounded-lg text-xs font-semibold text-emerald-300 hover:text-white hover:bg-emerald-900/60 transition-colors"
-              id="nav-btn-rentcar"
-            >
-              Sewa Bus
-            </button>
-            <button
-              onClick={() => scrollToSection('catalog', 'docs')}
-              className="px-2 py-1.5 rounded-lg text-xs font-semibold text-emerald-300 hover:text-white hover:bg-emerald-900/60 transition-colors"
-              id="nav-btn-docs"
-            >
-              Layanan Visa & ITAS
-            </button>
-            <button
-              onClick={() => scrollToSection('testimonials-gallery')}
-              className="px-2 py-1.5 rounded-lg text-xs font-semibold text-emerald-300 hover:text-white hover:bg-emerald-900/60 transition-colors"
-              id="nav-btn-testimonials"
-            >
-              Testimoni & Galeri
-            </button>
-            <button
-              onClick={() => scrollToSection('faq')}
-              className="px-2 py-1.5 rounded-lg text-xs font-semibold text-emerald-300 hover:text-white hover:bg-emerald-900/60 transition-colors"
-              id="nav-btn-faq"
-            >
-              FAQ & Kontak
-            </button>
-            <button
-              onClick={onNavigateToBooking}
-              className="mx-1 px-3 py-1.5 bg-amber-500 text-emerald-950 font-bold rounded-lg text-[11px] hover:bg-amber-400 hover:scale-105 transition-all shadow-md shadow-amber-500/10 cursor-pointer"
-              id="nav-btn-pesan"
-            >
+          {/* Desktop Menu */}
+          <div className="hidden lg:flex items-center gap-8">
+            <span onClick={() => { setIsAdminView(false); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition-colors">Beranda</span>
+            <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('wisata'); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition-colors">Paket Wisata & Umroh</span>
+            <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('armada'); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition-colors">Sewa Bus</span>
+            <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('dokumen'); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition-colors">Layanan Visa & ITAS</span>
+            <span onClick={() => { setIsAdminView(false); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition-colors">Testimoni & Galeri</span>
+            <span onClick={() => { setIsAdminView(false); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition-colors">FAQ & Kontak</span>
+
+            <button onClick={onNavigateToBooking} className="bg-amber-500 hover:bg-amber-600 text-emerald-950 px-5 py-2.5 rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition-all duration-200">
               Sistem Pemesanan
             </button>
-          </div>
 
-          {/* Admin Switcher Desk */}
-          <div className="hidden lg:flex items-center border-l border-emerald-800 pl-4">
-            <button
-              onClick={() => setIsAdminView(!isAdminView)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold tracking-wide uppercase transition-all duration-300 cursor-pointer ${
-                isAdminView
-                  ? 'bg-emerald-600 border border-emerald-400 text-white shadow-md shadow-emerald-500/20'
-                  : 'bg-emerald-900/40 border border-emerald-800 text-emerald-300 hover:bg-emerald-900/80 hover:text-white'
-              }`}
-              id="nav-btn-admin-desktop"
-            >
-              <LayoutDashboard className="h-4 w-4" />
-              {isAdminView ? 'Mode: Pegawai' : 'Portal Pegawai'}
-            </button>
+            {/* Admin Switcher Desk */}
+            <div className={`items-center border-l border-emerald-800 pl-4 ${!isAdminView ? 'hidden' : 'flex'}`}>
+              <button
+                onClick={() => setIsAdminView(!isAdminView)}
+                className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold tracking-wide uppercase transition-all duration-200 bg-emerald-600 border border-emerald-400 text-white shadow-md shadow-emerald-500/20"
+                id="nav-btn-admin-desktop"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Kembali Ke Landing Page
+              </button>
+            </div>
           </div>
 
           {/* Mobile hamburger button */}
           <div className="lg:hidden flex items-center gap-2">
             <button
               onClick={() => setIsAdminView(!isAdminView)}
-              className={`p-2 rounded-lg ${
-                isAdminView ? 'bg-emerald-700 text-white' : 'bg-emerald-900/50 text-emerald-300'
-              }`}
-              title="Portal Pegawai"
+              className={`p-2 rounded-lg transition-all duration-200 ${!isAdminView ? 'hidden' : 'bg-emerald-700 text-white'}`}
+              title="Kembali Ke Landing Page"
               id="nav-btn-admin-mobile-icon"
             >
               <LayoutDashboard className="h-5 w-5" />
             </button>
+
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-lg text-emerald-300 hover:text-white hover:bg-emerald-900/50 focus:outline-none transition-colors"
+              className="inline-flex items-center justify-center p-2 rounded-lg text-emerald-300 hover:text-white hover:bg-emerald-900 focus:outline-none transition-colors"
               id="nav-btn-hamburger"
             >
               {isOpen ? <X className="block h-6 w-6" /> : <Menu className="block h-6 w-6" />}
@@ -135,82 +76,31 @@ export default function Navbar({ isAdminView, setIsAdminView, onNavigateToBookin
       </div>
 
       {/* Mobile Menu */}
-      {isOpen && (
-        <div className="lg:hidden bg-emerald-950 border-b border-emerald-800 shadow-xl transition-all duration-200">
-          <div className="px-2 pt-2 pb-4 space-y-1.5 sm:px-3">
-            <button
-              onClick={() => scrollToSection('hero')}
-              className="block w-full text-left px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-emerald-900/50"
-              id="mob-nav-btn-home"
-            >
-              Beranda
-            </button>
-            <button
-              onClick={() => scrollToSection('catalog', 'packages')}
-              className="block w-full text-left px-3 py-2 rounded-md text-sm font-medium text-emerald-300 hover:text-white hover:bg-emerald-900/50"
-              id="mob-nav-btn-packages"
-            >
-              Paket Wisata & Umroh
-            </button>
-            <button
-              onClick={() => scrollToSection('catalog', 'rentcar')}
-              className="block w-full text-left px-3 py-2 rounded-md text-sm font-medium text-emerald-300 hover:text-white hover:bg-emerald-900/50"
-              id="mob-nav-btn-rentcar"
-            >
-              Sewa Bus Pariwisata
-            </button>
-            <button
-              onClick={() => scrollToSection('catalog', 'docs')}
-              className="block w-full text-left px-3 py-2 rounded-md text-sm font-medium text-emerald-300 hover:text-white hover:bg-emerald-900/50"
-              id="mob-nav-btn-docs"
-            >
-              Layanan Visa & ITAS
-            </button>
-            <button
-              onClick={() => scrollToSection('testimonials-gallery')}
-              className="block w-full text-left px-3 py-2 rounded-md text-sm font-medium text-emerald-300 hover:text-white hover:bg-emerald-900/50"
-              id="mob-nav-btn-testimonials"
-            >
-              Testimoni & Galeri Dokumentasi
-            </button>
-            <button
-              onClick={() => scrollToSection('faq')}
-              className="block w-full text-left px-3 py-2 rounded-md text-sm font-medium text-emerald-300 hover:text-white hover:bg-emerald-900/50"
-              id="mob-nav-btn-faq"
-            >
-              FAQ & Kontak
-            </button>
-            <button
-              onClick={() => {
-                onNavigateToBooking();
-                setIsOpen(false);
-              }}
-              className="block w-full text-center px-4 py-2.5 bg-amber-500 text-emerald-950 text-sm font-bold rounded-md hover:bg-amber-400 mt-2"
-              id="mob-nav-btn-pesan"
-            >
+      <div className={`lg:hidden transition-all duration-300 ease-in-out ${isOpen ? 'block opacity-100' : 'hidden opacity-0'}`}>
+        <div className="px-2 pt-2 pb-4 space-y-1 bg-emerald-900 border-t border-emerald-800 shadow-inner">
+          <span onClick={() => { setIsAdminView(false); setIsOpen(false); }} className="block px-4 py-3 rounded-lg text-base font-medium text-emerald-100 hover:text-white hover:bg-emerald-800 transition-colors cursor-pointer">Beranda</span>
+          <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('wisata'); setIsOpen(false); }} className="block px-4 py-3 rounded-lg text-base font-medium text-emerald-100 hover:text-white hover:bg-emerald-800 transition-colors cursor-pointer">Paket Wisata & Umroh</span>
+          <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('armada'); setIsOpen(false); }} className="block px-4 py-3 rounded-lg text-base font-medium text-emerald-100 hover:text-white hover:bg-emerald-800 transition-colors cursor-pointer">Sewa Bus</span>
+          <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('dokumen'); setIsOpen(false); }} className="block px-4 py-3 rounded-lg text-base font-medium text-emerald-100 hover:text-white hover:bg-emerald-800 transition-colors cursor-pointer">Layanan Visa & ITAS</span>
+          <span onClick={() => { setIsAdminView(false); setIsOpen(false); }} className="block px-4 py-3 rounded-lg text-base font-medium text-emerald-100 hover:text-white hover:bg-emerald-800 transition-colors cursor-pointer">Testimoni & Galeri</span>
+          <span onClick={() => { setIsAdminView(false); setIsOpen(false); }} className="block px-4 py-3 rounded-lg text-base font-medium text-emerald-100 hover:text-white hover:bg-emerald-800 transition-colors cursor-pointer">FAQ & Kontak</span>
+
+          <div className="pt-4 px-4 border-t border-emerald-800 space-y-3">
+            <button onClick={() => { onNavigateToBooking(); setIsOpen(false); }} className="w-full bg-amber-500 hover:bg-amber-600 text-emerald-950 px-4 py-3 rounded-lg text-base font-bold shadow-md transition-colors">
               Sistem Pemesanan
             </button>
 
-            <div className="border-t border-emerald-800 pt-3 mt-3">
-              <button
-                onClick={() => {
-                  setIsAdminView(!isAdminView);
-                  setIsOpen(false);
-                }}
-                className={`flex items-center justify-center gap-2 w-full px-4 py-2 rounded-md text-xs font-semibold tracking-wide uppercase transition-colors ${
-                  isAdminView
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-emerald-900 text-emerald-300'
-                }`}
-                id="mob-nav-btn-admin-toggle"
-              >
-                <LayoutDashboard className="h-4 w-4" />
-                {isAdminView ? 'Kembali Ke Landing Page' : 'Masuk Portal Pegawai'}
-              </button>
-            </div>
+            <button
+              onClick={() => { setIsAdminView(!isAdminView); setIsOpen(false); }}
+              className={`flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg text-base font-semibold border transition-all ${!isAdminView ? 'hidden' : 'bg-emerald-600 border-emerald-400 text-white'}`}
+              id="mob-nav-btn-admin-toggle"
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              Kembali Ke Landing Page
+            </button>
           </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 }
