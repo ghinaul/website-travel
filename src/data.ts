@@ -53,7 +53,7 @@ export const INTERNATIONAL_PACKAGES: TravelPackage[] = [
     highlights: ['Kunjungan ke Perwakilan/Kedutaan/Konsulat Jendral Indonesia di Negara Tujuan', 'Kunjungan ke Biro-biro Keperamukaan (NSO) dibeberapa negara tujuan', 'Kunjungan ke Sekolah/Universitas unggulan dan pembesar negara setempat', 'Penampilan keterampilan kepramukaan dan seni nusantara', 'Kunjungan objek wisata dan berbelanja disetiap negara'],
     includes: ['Tiket Pesawat : Jakarta - Hanoi Vietnam & Batam - Jakarta', 'Tiket Penyebrangan Jet Foil Setulang Laut Johor Bahru -  Batam Center', 'Bus Pariwisata selama kegiatan', 'Hotel', 'Tiket Wisata', 'Tour Leader & Tips Supir', 'Makan 3x sehari']
   },
-   {
+  {
     id: 'int-4',
     title: 'Umroh Plus Cairo Alexandria "24 Desember 2026"',
     category: 'international',
@@ -63,6 +63,17 @@ export const INTERNATIONAL_PACKAGES: TravelPackage[] = [
     image: '/assets/foto-umroh.jpeg',
     highlights: ['Bimbingan Manasik Intensif', 'Ziarah Kota Makkah & Madinah', 'Air Zam-Zam', 'City Tour Cairo', 'City Tour Alexandria', 'Old City Jeddah', 'Dinner Nile Cruise', 'Museum Mummy', 'Kereta Cepat', 'Ayam Albaik', 'Perlengkapan Umroh Lengkap'],
     includes: ['Tiket Pesawat EgptAir', 'Visa Umroh Berizin Resmi', 'Hotel Cairo 3 Malam (Tiba Pyramid)', 'Hotel Madinah 3 Malam (Jaeharat Al Rasyid)', 'Hotel Makkah 4 Malam (Maysan Al Maqam)', 'Makan 3x menu Indonesia', 'Muthawwif Profesional']
+  },
+{
+    id: 'int-5',
+    title: 'Dauroh Ummul Quro Tokoh ke-18  "2-21 Juli 2026"',
+    category: 'international',
+    duration: '18 Hari 16 Malam',
+    pricePerPax: 31380000,
+    description: 'Belajar bahasa arab selama 1 bulan di Mekkah plus umroh.',
+    image: '/assets/foto-duq-tokoh-18.jpeg',
+    highlights: ['Bimbingan Manasik Intensif', 'Ziarah Kota Makkah & Madinah', 'Air Zam-Zam', 'Perlengkapan Umroh Lengkap'],
+    includes: ['Tiket Pesawat Saudi PP', 'Visa Umroh Berizin Resmi', 'Hotel Makkah 14 Hari/13 Malam', 'Hotel Madinah 4 Hari/3 Malam', 'Makan selama di Hotel Makah dan Madinah', 'Muthawwif Profesional', 'Transportasi Bus AC selama di Arab Saudi', 'Umroh',]
   }
 ];
 

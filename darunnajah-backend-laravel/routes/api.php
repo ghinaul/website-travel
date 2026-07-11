@@ -9,3 +9,4 @@ Route::post('/booking/store', [BookingController::class, 'store']);
 
 // JALUR TAMBAHAN: Untuk mengambil data pendaftaran ke Dashboard React
 Route::get('/bookings', [BookingController::class, 'index']);
+Route::put('/bookings/{id}', [BookingController::class, 'update']);

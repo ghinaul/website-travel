@@ -148,28 +148,34 @@ export default function App() {
           {/* Navigation Links Column */}
           <div className="md:col-span-3 space-y-3">
             <h4 className="text-xs font-black uppercase text-amber-400 tracking-wider font-mono">Tautan Pintas</h4>
-            <ul className="space-y-2 text-xs text-emerald-100">
-              <li>
-                <button onClick={handleBackToHome} className="hover:text-white hover:underline transition-colors block text-left">
-                  Beranda Utama
-                </button>
-              </li>
-              <li>
-                <button onClick={() => { setIsAdminView(false); setTimeout(() => document.getElementById('sejarah')?.scrollIntoView({ behavior: 'smooth' }), 100); }} className="hover:text-white hover:underline transition-colors block text-left">
-                  Sejarah PT Darunnajah
-                </button>
-              </li>
-              <li>
-                <button onClick={() => { setIsAdminView(false); setTimeout(() => document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' }), 100); }} className="hover:text-white hover:underline transition-colors block text-left">
-                  Katalog Unit & Paket
-                </button>
-              </li>
-              <li>
-                <button onClick={() => { setIsAdminView(false); setTimeout(() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' }), 100); }} className="hover:text-white hover:underline transition-colors block text-left">
-                  FAQ & Syarat Order
-                </button>
-              </li>
-            </ul>
+           <ul className="space-y-2 text-xs text-emerald-100">
+            <li>
+              <button onClick={handleBackToHome} className="hover:text-white hover:underline transition-colors block text-left">
+                Beranda Utama
+              </button>
+            </li>
+            <li>
+              <button onClick={() => { setIsAdminView(false); setTimeout(() => document.getElementById('sejarah')?.scrollIntoView({ behavior: 'smooth' }), 100); }} className="hover:text-white hover:underline transition-colors block text-left">
+                Sejarah PT Darunnajah
+              </button>
+            </li>
+            <li>
+              <button onClick={() => { setIsAdminView(false); setTimeout(() => document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' }), 100); }} className="hover:text-white hover:underline transition-colors block text-left">
+                Katalog Unit & Paket
+              </button>
+            </li>
+            <li>
+              <button onClick={() => { setIsAdminView(false); setTimeout(() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' }), 100); }} className="hover:text-white hover:underline transition-colors block text-left">
+                FAQ & Syarat Order
+              </button>
+            </li>
+            {/* TAUTAN BARU: Portal Pegawai */}
+            <li className="pt-1 border-t border-emerald-900/50">
+              <button onClick={() => setIsAdminView(true)} className="text-emerald-300/90 hover:text-white hover:underline transition-colors block text-left font-medium">
+                Portal Pegawai
+              </button>
+            </li>
+          </ul>
           </div>
 
           {/* Legal references / licenses column */}

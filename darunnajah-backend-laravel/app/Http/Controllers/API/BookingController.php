@@ -38,4 +38,27 @@ class BookingController extends Controller
             'data'    => $booking
         ], 201);
     }
+    // 3. Fungsi UPDATE untuk mengubah status pemesanan dari dashboard pegawai
+    public function update(Request $request, $id)
+    {
+        // Validasi kata status yang masuk dari React
+        $request->validate([
+            'status' => 'required|string|in:Confirmed,Cancelled,Completed'
+        ]);
+
+        // Cari data booking berdasarkan ID, jika tidak ketemu langsung error 404
+        $booking = Booking::findOrFail($id);
+
+        // Update kolom status di database MySQL
+        $booking->update([
+            'status' => $request->status
+        ]);
+
+        // Kirim respon sukses balik ke React
+        return response()->json([
+            'success' => true,
+            'message' => 'Status pemesanan berhasil diperbarui!',
+            'data' => $booking
+        ], 200);
+    }
 }
