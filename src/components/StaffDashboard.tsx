@@ -154,10 +154,6 @@ const handleExportPDF = () => {
       return;
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 6efd6eea2b0b5de569a8b40fca3efbff72c614c9
     // Memuat library jspdf secara dinamis agar aman dari eror compiler TypeScript
     import('jspdf').then((jsPDFModule) => {
       import('jspdf-autotable').then(() => {
@@ -209,11 +205,7 @@ const handleExportPDF = () => {
       console.error("Gagal mengunduh PDF:", err);
       alert("Terjadi kesalahan sistem saat membuat PDF.");
     });
-<<<<<<< HEAD
-=======
-=======
 
->>>>>>> 6efd6eea2b0b5de569a8b40fca3efbff72c614c9
     // Mengubah judul dokumen sementara agar saat terunduh nama filenya otomatis rapi
     const originalTitle = document.title;
     document.title = `rekapan-pemesanan-darunnajah-${new Date().toISOString().substring(0, 10)}`;
@@ -225,7 +217,6 @@ const handleExportPDF = () => {
     setTimeout(() => {
       document.title = originalTitle;
     }, 1000);
->>>>>>> d236083517b2220e41f4915aaeffedfb3637260c
   };
   
 
