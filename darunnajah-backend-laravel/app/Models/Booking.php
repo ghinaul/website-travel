@@ -9,13 +9,26 @@ class Booking extends Model
 {
     use HasFactory;
 
+    // Relasi: Setiap Booking memiliki/terhubung ke satu Layanan
+    public function service()
+    {
+        return $this->belongsTo(Service::class);
+    }
+
     // Ini adalah 'whitelist' izin mass assignment untuk Laravel
     protected $fillable = [
-        'customer_name',  // Menghilangkan error customer_name kemarin
-        'whatsapp_number',// Mengizinkan kolom No. WhatsApp
-        'email',          // Mengizinkan kolom Email
-        'booking_date',   // Mengizinkan kolom Tanggal Pemesanan
-        'service',        // Mengizinkan jenis layanan (Paket Wisata/Sewa Bus)
-        'participants',   // Mengizinkan Jumlah Peserta
+        'customer_name',
+        'whatsapp_number',
+        'email',
+        'booking_date',
+        'service_id',
+        'participants',
+        'user_id',
     ];
+
+    // Relasi ke User/Staff
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

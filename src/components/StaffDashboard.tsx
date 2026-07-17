@@ -12,6 +12,7 @@ import {
 import { Booking } from '../types';
 
 
+
 export default function StaffDashboard() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -152,6 +153,58 @@ const handleExportPDF = () => {
       alert('Tidak ada data pemesanan untuk diekspor.');
       return;
     }
+
+    // Memuat library jspdf secara dinamis agar aman dari eror compiler TypeScript
+    import('jspdf').then((jsPDFModule) => {
+      import('jspdf-autotable').then(() => {
+        const doc = new (jsPDFModule.default || jsPDFModule.jsPDF)({
+          orientation: 'landscape',
+          unit: 'mm',
+          format: 'a4'
+        });
+
+        // 1. Tambahkan Judul Laporan di dalam PDF
+        doc.setFontSize(16);
+        doc.text('DARUNNAJAH TOURS & TRAVEL', 14, 15);
+        doc.setFontSize(12);
+        doc.text('Laporan Rekapan Pendataan Reservasi Dashboard', 14, 22);
+        doc.setFontSize(10);
+        doc.text(`Tanggal Unduh: ${new Date().toLocaleDateString('id-ID')}`, 14, 28);
+
+        // 2. Siapkan Kolom Tabel Laporan
+        const tableColumn = ["Kode Booking", "Data Pemesan", "Layanan & Qty", "Tarif Total", "Status"];
+        const tableRows: any[] = [];
+
+        // 3. Masukkan Data dari State Aplikasi ke Baris Tabel
+        filteredBookings.forEach((booking: any) => {
+          const bookingData = [
+            booking.code || '-',
+            `${booking.customer_name}\n${booking.customer_phone}`,
+            `${booking.service_type || '-'} (${booking.quantity || 1} orang)`,
+            `Rp ${Number(booking.total_price || 0).toLocaleString('id-ID')}`,
+            booking.status || '-'
+          ];
+          tableRows.push(bookingData);
+        });
+
+        // 4. Gambar Tabel Otomatis ke dalam Dokumen PDF
+        (doc as any).autoTable({
+          head: [tableColumn],
+          body: tableRows,
+          startY: 35,
+          theme: 'grid',
+          headStyles: { fillColor: [4, 47, 26] }, // Warna hijau khas Darunnajah
+          styles: { fontSize: 9, cellPadding: 3 }
+        });
+
+        // 5. Perintah Unduh Otomatis Langsung ke Browser
+        const fileName = `rekapan-darunnajah-${new Date().toISOString().substring(0, 10)}.pdf`;
+        doc.save(fileName);
+      });
+    }).catch(err => {
+      console.error("Gagal mengunduh PDF:", err);
+      alert("Terjadi kesalahan sistem saat membuat PDF.");
+    });
 
     // Mengubah judul dokumen sementara agar saat terunduh nama filenya otomatis rapi
     const originalTitle = document.title;

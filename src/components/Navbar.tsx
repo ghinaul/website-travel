@@ -5,7 +5,7 @@ interface NavbarProps {
   isAdminView: boolean;
   setIsAdminView: (value: boolean) => void;
   onNavigateToBooking: () => void;
-  onNavigateToCatalogTab: (tab: string) => void;
+  onNavigateToCatalogTab: (tab: any) => void;
 }
 
 export default function Navbar({
@@ -20,7 +20,7 @@ export default function Navbar({
     <nav className="bg-emerald-950 text-white sticky top-0 z-50 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => setIsAdminView(false)}>
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => setIsAdminView(true)}>
             <div className="flex flex-col">
               <span className="font-bold text-xl tracking-wider text-emerald-50">Darunnajah</span>
               <span className="text-xs font-semibold tracking-widest text-emerald-400 uppercase">Tours & Travel</span>

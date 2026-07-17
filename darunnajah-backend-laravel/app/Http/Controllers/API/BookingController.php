@@ -20,12 +20,12 @@ class BookingController extends Controller
     {
         // 1. Validasi semua data dari form React agar sesuai dengan Model & Database
         $validated = $request->validate([
-            'customer_name'  => 'required|string|max:255',
-            'email'          => 'required|email',
-            'whatsapp_number'=> 'required|string',
-            'booking_date'   => 'required|string',
-            'service'        => 'required|string',
-            'participants'   => 'required|integer',
+            'customer_name'   => 'required|string|max:255',
+            'email'           => 'required|email',
+            'whatsapp_number' => 'required|string',
+            'booking_date'    => 'required|string',
+            'service_id'      => 'required|exists:services,id',
+            'participants'    => 'required|integer',
         ]);
 
         // 2. Simpan data ke dalam tabel bookings
@@ -38,27 +38,38 @@ class BookingController extends Controller
             'data'    => $booking
         ], 201);
     }
+
     // 3. Fungsi UPDATE untuk mengubah status pemesanan dari dashboard pegawai
     public function update(Request $request, $id)
     {
-        // Validasi kata status yang masuk dari React
+        // Validasi melonggarkan string agar menerima format dari tombol React maupun teks Kapital
         $request->validate([
-            'status' => 'required|string|in:Confirmed,Cancelled,Completed'
+            'status' => 'required|string|in:Pending,Confirmed,Completed,Cancelled,PENDING,CONFIRMED,COMPLETED,CANCELLED,MENUNGGU,DISETUJUI,BATAL,SELESAI'
         ]);
 
-        // Cari data booking berdasarkan ID, jika tidak ketemu langsung error 404
         $booking = Booking::findOrFail($id);
 
-        // Update kolom status di database MySQL
+        // Update status di database MySQL
         $booking->update([
-            'status' => $request->status
+            'status'  => $request->status,
+            'user_id' => auth()->id() ?? 1 // Mencatat ID staff login, angka 1 sebagai backup demo
         ]);
 
-        // Kirim respon sukses balik ke React
         return response()->json([
             'success' => true,
             'message' => 'Status pemesanan berhasil diperbarui!',
-            'data' => $booking
+            'data'    => $booking
+        ], 200);
+    }
+    // 4. Fungsi DELETE untuk menghapus data booking dari dashboard
+    public function destroy($id)
+    {
+        $booking = Booking::findOrFail($id);
+        $booking->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data pemesanan berhasil dihapus!'
         ], 200);
     }
 }

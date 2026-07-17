@@ -4,13 +4,20 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Send, CheckCircle, MessageSquare } from 'lucide-react';
-import { DOMESTIC_PACKAGES, INTERNATIONAL_PACKAGES, BUS_FLEET, DOCUMENT_SERVICES } from '../data';
+import { Send, CheckCircle } from 'lucide-react';
+
+interface ServiceItem {
+  id: number;
+  service_name: string;
+  category: 'package' | 'rentcar';
+  price: number;
+  description: string;
+}
 
 interface BookingFormProps {
   preselectedService?: {
-    type: 'package' | 'rentcar' | 'visa_itas';
-    id: string;
+    type: 'package' | 'rentcar';
+    id: number;
     name: string;
   } | null;
   onClearPreselected: () => void;
@@ -23,89 +30,81 @@ export default function BookingForm({
   onBookingSuccess 
 }: BookingFormProps) {
   // --- State ---
-  const [serviceType, setServiceType] = useState<'package' | 'rentcar' | 'visa_itas'>('package');
-  const [selectedItemId, setSelectedItemId] = useState('');
+  const [services, setServices] = useState<ServiceItem[]>([]);
+  const [serviceType, setServiceType] = useState<'package' | 'rentcar'>('package');
+  const [selectedItemId, setSelectedItemId] = useState<number | ''>('');
   
   // Data Diri
   const [customerName, setCustomerName] = useState('');
-  const [whatsappNumber, setWhatsappNumber] = useState(''); // ← Ubah ke whatsapp_number
-  const [email, setEmail] = useState('');                  // ← Ubah ke email
-  const [identityNumber, setIdentityNumber] = useState('');
+  const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [email, setEmail] = useState('');
   const [bookingDate, setBookingDate] = useState('');
   const [multiplier, setMultiplier] = useState(1);
   const [specialNotes, setSpecialNotes] = useState('');
 
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [generatedData, setGeneratedData] = useState<any>(null);
   const [validationError, setValidationError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // --- Effects ---
+  // --- 1. Fetch Data dari Backend Laravel ---
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/services');
+        if (response.ok) {
+          const data: ServiceItem[] = await response.json();
+          setServices(data);
+          
+          // Set default selected item berdasarkan tipe yang aktif
+          const filtered = data.filter(item => item.category === serviceType);
+          if (filtered.length > 0) {
+            setSelectedItemId(filtered[0].id);
+          }
+        }
+      } catch (error) {
+        console.error("Gagal mengambil data layanan:", error);
+        setValidationError("Gagal memuat data layanan dari server. Pastikan Backend menyala.");
+      }
+    };
+
+    fetchServices();
+  }, []);
+
+  // --- 2. Handle Preselected & Type Changes ---
   useEffect(() => {
     if (preselectedService) {
       setServiceType(preselectedService.type);
       setSelectedItemId(preselectedService.id);
-    } else {
-      updateDefaultItem(serviceType);
+    } else if (services.length > 0) {
+      const filtered = services.filter(item => item.category === serviceType);
+      if (filtered.length > 0) {
+        setSelectedItemId(filtered[0].id);
+      }
     }
-  }, [preselectedService]);
+  }, [preselectedService, serviceType, services]);
 
-  // --- Helpers ---
-  const updateDefaultItem = (type: 'package' | 'rentcar' | 'visa_itas') => {
-    let defaultId = '';
-    if (type === 'package') defaultId = DOMESTIC_PACKAGES[0]?.id || '';
-    else if (type === 'rentcar') defaultId = BUS_FLEET[0]?.id || '';
-    else defaultId = DOCUMENT_SERVICES[0]?.id || '';
-    setSelectedItemId(defaultId);
-  };
-
-  const handleServiceTypeChange = (type: 'package' | 'rentcar' | 'visa_itas') => {
+  const handleServiceTypeChange = (type: 'package' | 'rentcar') => {
     onClearPreselected();
     setServiceType(type);
-    updateDefaultItem(type);
     setMultiplier(1);
     setValidationError('');
   };
 
-  const getSubItems = () => {
-    if (serviceType === 'package') {
-      return [...DOMESTIC_PACKAGES, ...INTERNATIONAL_PACKAGES].map(p => ({
-        id: p.id,
-        name: `${p.title} (${p.duration})`,
-        price: p.pricePerPax,
-        multiplierLabel: 'Jumlah Peserta'
-      }));
-    } else if (serviceType === 'rentcar') {
-      return BUS_FLEET.map(b => ({
-        id: b.id,
-        name: `${b.name} (${b.capacity} Kursi)`,
-        price: b.pricePerDay,
-        multiplierLabel: 'Durasi (Hari)'
-      }));
-    } else {
-      return DOCUMENT_SERVICES.map(d => ({
-        id: d.id,
-        name: d.name,
-        price: d.priceEstimation,
-        multiplierLabel: 'Jumlah Pemohon'
-      }));
-    }
-  };
-
-  const activeSubItems = getSubItems();
-  const currentSubItem = activeSubItems.find(item => item.id === selectedItemId) || activeSubItems[0];
+  // Filter layanan yang tampil di dropdown sesuai Tab kategori aktif
+  const activeSubItems = services.filter(item => item.category === serviceType);
+  const currentSubItem = services.find(item => item.id === Number(selectedItemId));
   
   const calculateTotal = () => {
     return currentSubItem ? currentSubItem.price * multiplier : 0;
   };
 
-  // --- Submit Handler: KIRIM KE LARAVEL API ---
+  // --- 3. Submit Handler: KIRIM KE LARAVEL API ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError('');
     setIsSubmitting(true);
 
-    // 1. Validasi Dasar
+    // Validasi Dasar
     if (!customerName.trim()) {
       setValidationError('Mohon masukkan nama lengkap Anda.');
       setIsSubmitting(false);
@@ -126,8 +125,12 @@ export default function BookingForm({
       setIsSubmitting(false);
       return;
     }
+    if (!selectedItemId) {
+      setValidationError('Mohon pilih layanan terlebih dahulu.');
+      setIsSubmitting(false);
+      return;
+    }
 
-    // 2. Kirim ke Backend Laravel
     try {
       const response = await fetch('http://127.0.0.1:8000/api/booking/store', {
         method: 'POST',
@@ -135,21 +138,20 @@ export default function BookingForm({
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-      body: JSON.stringify({
-        customer_name: customerName,
-        email: email,
-        whatsapp_number: whatsappNumber,
-        booking_date: bookingDate,
-        service: selectedItemId,     // Pastikan menggunakan selectedItemId
-        participants: multiplier,    // Pastikan menggunakan multiplier
-        notes: specialNotes,         // Sesuaikan dengan kebutuhan
-    }),
+        body: JSON.stringify({
+          customer_name: customerName,
+          email: email,
+          whatsapp_number: whatsappNumber,
+          booking_date: bookingDate,
+          service_id: Number(selectedItemId), // Dikirim sebagai service_id
+          participants: multiplier,
+          notes: specialNotes,
+        }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setGeneratedData(data.data);
         setIsSubmitted(true);
         if (onBookingSuccess) onBookingSuccess();
       } else {
@@ -164,7 +166,6 @@ export default function BookingForm({
   };
 
   const getWhatsAppLink = () => {
-    // Tentukan nomor WhatsApp Admin Travel asli di sini (awali dengan 62)
     const nomorAdmin = "6281285567034"; 
 
     const textMessage = `Halo Admin Darunnajah Tours & Travel, saya ingin mengonfirmasi pemesanan yang baru saja saya buat di website:
@@ -172,8 +173,9 @@ export default function BookingForm({
 *Nama Pemesan:* ${customerName}
 *Email:* ${email}
 *No. WhatsApp:* ${whatsappNumber}
+*Layanan:* ${currentSubItem?.service_name || '-'}
 *Tanggal Booking:* ${bookingDate}
-*Jumlah Peserta:* ${multiplier} Orang
+*Jumlah Peserta/Durasi:* ${multiplier}
 
 Mohon untuk diproses lebih lanjut. Terima kasih!`;
 
@@ -182,7 +184,6 @@ Mohon untuk diproses lebih lanjut. Terima kasih!`;
 
   const handleReset = () => {
     setIsSubmitted(false);
-    setGeneratedData(null);
     setCustomerName('');
     setWhatsappNumber('');
     setEmail('');
@@ -190,16 +191,14 @@ Mohon untuk diproses lebih lanjut. Terima kasih!`;
     setMultiplier(1);
     setSpecialNotes('');
     onClearPreselected();
-    updateDefaultItem('package');
+    setServiceType('package');
   };
 
-  // --- Render ---
   return (
     <div id="booking-section" className="py-20 bg-emerald-950 text-white relative">
       <div className="absolute inset-0 z-0 opacity-10 pointer-events-none bg-[radial-gradient(ellipse_at_top,rgba(251,191,36,0.15)_0,transparent_50%)]" />
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
         <div className="text-center mb-12">
           <span className="text-xs font-bold text-amber-400 uppercase tracking-widest bg-emerald-900 border border-emerald-800 px-3 py-1.5 rounded-full inline-block mb-3">
             Sistem Booking Terpadu
@@ -212,15 +211,12 @@ Mohon untuk diproses lebih lanjut. Terima kasih!`;
         {!isSubmitted ? (
           <div className="bg-emerald-900/40 border border-emerald-850/80 rounded-[32px] p-6 sm:p-12 backdrop-blur-xl shadow-2xl">
             {/* Tabs */}
-            <div className="grid grid-cols-3 gap-2 mb-10 bg-[#031d10]/90 p-1.5 rounded-2xl border border-emerald-900/80">
+            <div className="grid grid-cols-2 gap-2 mb-10 bg-[#031d10]/90 p-1.5 rounded-2xl border border-emerald-900/80">
               <button type="button" onClick={() => handleServiceTypeChange('package')} className={`py-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest ${serviceType === 'package' ? 'bg-amber-500 text-emerald-950' : 'text-emerald-300/80'}`}>
-                Paket Wisata
+                Paket Wisata (Umroh)
               </button>
               <button type="button" onClick={() => handleServiceTypeChange('rentcar')} className={`py-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest ${serviceType === 'rentcar' ? 'bg-amber-500 text-emerald-950' : 'text-emerald-300/80'}`}>
                 Sewa Bus
-              </button>
-              <button type="button" onClick={() => handleServiceTypeChange('visa_itas')} className={`py-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest ${serviceType === 'visa_itas' ? 'bg-amber-500 text-emerald-950' : 'text-emerald-300/80'}`}>
-                Visa & ITAS
               </button>
             </div>
 
@@ -231,22 +227,32 @@ Mohon untuk diproses lebih lanjut. Terima kasih!`;
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-           {/* Pilih Layanan */}
+              {/* Pilih Layanan */}
               <div className="grid sm:grid-cols-2 gap-6 bg-emerald-950/40 p-5 rounded-2xl border border-emerald-800/60">
                 <div>
-                  <label className="block text-xs text-emerald-300 uppercase font-bold mb-2">Layanan</label>
-                  <select value={selectedItemId} onChange={(e) => setSelectedItemId(e.target.value)} className="w-full bg-emerald-950 text-white rounded-xl px-4 py-3 border border-emerald-800">
-                    {activeSubItems.map(item => (
-                      <option key={item.id} value={item.id}>{item.name}</option>
-                    ))}
+                  <label className="block text-xs text-emerald-300 uppercase font-bold mb-2">Pilih Layanan</label>
+                  <select 
+                    value={selectedItemId} 
+                    onChange={(e) => setSelectedItemId(Number(e.target.value))} 
+                    className="w-full bg-emerald-950 text-white rounded-xl px-4 py-3 border border-emerald-800"
+                  >
+                    {activeSubItems.length === 0 ? (
+                      <option value="">Memuat layanan...</option>
+                    ) : (
+                      activeSubItems.map(item => (
+                        <option key={item.id} value={item.id}>{item.service_name}</option>
+                      ))
+                    )}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-emerald-300 uppercase font-bold mb-2">{currentSubItem?.multiplierLabel}</label>
+                  <label className="block text-xs text-emerald-300 uppercase font-bold mb-2">
+                    {serviceType === 'package' ? 'Jumlah Peserta' : 'Durasi Sewa (Hari)'}
+                  </label>
                   <div className="flex">
-                    <button type="button" onClick={() => setMultiplier(m => Math.max(1, m - 1))} className="px-4 py-3 border border-emerald-800 font-bold">-</button>
+                    <button type="button" onClick={() => setMultiplier(m => Math.max(1, m - 1))} className="px-4 py-3 border border-emerald-800 font-bold bg-emerald-950">-</button>
                     <input type="number" min={1} value={multiplier} onChange={(e) => setMultiplier(Math.max(1, parseInt(e.target.value) || 1))} className="w-full text-center bg-emerald-950 border-y border-emerald-800" />
-                    <button type="button" onClick={() => setMultiplier(m => m + 1)} className="px-4 py-3 border border-emerald-800 font-bold">+</button>
+                    <button type="button" onClick={() => setMultiplier(m => m + 1)} className="px-4 py-3 border border-emerald-800 font-bold bg-emerald-950">+</button>
                   </div>
                 </div>
               </div>
@@ -268,12 +274,12 @@ Mohon untuk diproses lebih lanjut. Terima kasih!`;
                     <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-emerald-950 rounded-xl py-3 px-4 border border-emerald-800" />
                   </div>
                   <div>
-                    <label className="block text-xs text-emerald-300 mb-1">Tanggal</label>
+                    <label className="block text-xs text-emerald-300 mb-1">Tanggal Rencana Keberangkatan</label>
                     <input type="date" value={bookingDate} onChange={(e) => setBookingDate(e.target.value)} className="w-full bg-emerald-950 rounded-xl py-3 px-4 border border-emerald-800" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs text-emerald-300 mb-1">Catatan</label>
+                  <label className="block text-xs text-emerald-300 mb-1">Catatan Tambahan</label>
                   <input type="text" value={specialNotes} onChange={(e) => setSpecialNotes(e.target.value)} className="w-full bg-emerald-950 rounded-xl py-3 px-4 border border-emerald-800" />
                 </div>
               </div>
@@ -304,7 +310,7 @@ Mohon untuk diproses lebih lanjut. Terima kasih!`;
             <h3 className="text-2xl font-bold mb-2">Pemesanan Berhasil!</h3>
             <p className="text-emerald-800 mb-6">Tim Darunnajah akan menghubungi Anda segera.</p>
             
-            <a href={getWhatsAppLink()} target="_blank" className="block w-full py-3 bg-[#25D366] text-white font-bold rounded-xl mb-3">
+            <a href={getWhatsAppLink()} target="_blank" rel="noreferrer" className="block w-full py-3 bg-[#25D366] text-white font-bold rounded-xl mb-3">
               Konfirmasi via WhatsApp
             </a>
             <button onClick={handleReset} className="text-emerald-600 text-sm underline">
