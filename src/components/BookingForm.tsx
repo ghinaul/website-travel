@@ -46,19 +46,25 @@ export default function BookingForm({
   const [validationError, setValidationError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // --- 1. Fetch Data dari Backend Laravel ---
-  useEffect(() => {
+// --- 1. Fetch Data dari Backend Laravel ---
+useEffect(() => {
     const fetchServices = async () => {
       try {
         const response = await fetch('http://127.0.0.1:8000/api/services');
         if (response.ok) {
           const data: ServiceItem[] = await response.json();
           setServices(data);
-          
-          // Set default selected item berdasarkan tipe yang aktif
-          const filtered = data.filter(item => item.category === serviceType);
-          if (filtered.length > 0) {
-            setSelectedItemId(filtered[0].id);
+
+          if (preselectedService) {
+            setServiceType(preselectedService.type);
+            setSelectedItemId(preselectedService.id);
+          } else {
+            const filtered = data.filter(item => item.category === serviceType);
+            if (filtered.length > 0) {
+              setSelectedItemId(filtered[0].id);
+            } else if (data.length > 0) {
+              setSelectedItemId(data[0].id);
+            }
           }
         }
       } catch (error) {
@@ -69,19 +75,6 @@ export default function BookingForm({
 
     fetchServices();
   }, []);
-
-  // --- 2. Handle Preselected & Type Changes ---
-  useEffect(() => {
-    if (preselectedService) {
-      setServiceType(preselectedService.type);
-      setSelectedItemId(preselectedService.id);
-    } else if (services.length > 0) {
-      const filtered = services.filter(item => item.category === serviceType);
-      if (filtered.length > 0) {
-        setSelectedItemId(filtered[0].id);
-      }
-    }
-  }, [preselectedService, serviceType, services]);
 
   const handleServiceTypeChange = (type: 'package' | 'rentcar') => {
     onClearPreselected();
