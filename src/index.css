@@ -1,6 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
 @import "tailwindcss";
 
+/* vscode-css-allow-unknown-at-rules */
 @theme {
   --font-sans: "Plus Jakarta Sans", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
@@ -60,4 +61,39 @@ body {
   background: rgba(4, 47, 26, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+}
+@media print {
+  /* Menyembunyikan elemen navigasi dan tombol aksi agar PDF terlihat profesional */
+  nav,
+  button,
+  .print\:hidden,
+  [class*="AXSI_VALIDASI"] {
+    display: none !important;
+  }
+
+  /* Mengatur halaman cetak ke mode Lanskap (Landscape) ukuran A4 */
+  @page {
+    size: A4 landscape;
+    margin: 15mm;
+  }
+
+  /* Memastikan warna latar belakang komponen dashboard tetap muncul di PDF */
+  body {
+    background-color: #fafafa !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Memastikan tabel data melebar dengan pas dan tidak terpotong ke samping */
+  .overflow-x-auto {
+    overflow: visible !important;
+  }
+  table {
+    width: 100% !important;
+    page-break-inside: auto;
+  }
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
 }

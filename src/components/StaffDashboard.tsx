@@ -12,6 +12,7 @@ import {
 import { Booking } from '../types';
 
 
+
 export default function StaffDashboard() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -153,6 +154,7 @@ const handleExportPDF = () => {
       return;
     }
 
+<<<<<<< HEAD
     // Memuat library jspdf secara dinamis agar aman dari eror compiler TypeScript
     import('jspdf').then((jsPDFModule) => {
       import('jspdf-autotable').then(() => {
@@ -204,6 +206,19 @@ const handleExportPDF = () => {
       console.error("Gagal mengunduh PDF:", err);
       alert("Terjadi kesalahan sistem saat membuat PDF.");
     });
+=======
+    // Mengubah judul dokumen sementara agar saat terunduh nama filenya otomatis rapi
+    const originalTitle = document.title;
+    document.title = `rekapan-pemesanan-darunnajah-${new Date().toISOString().substring(0, 10)}`;
+
+    // Memicu cetak PDF bawaan sistem
+    window.print();
+
+    // Mengembalikan judul dokumen ke aslinya setelah jendela cetak merespons
+    setTimeout(() => {
+      document.title = originalTitle;
+    }, 1000);
+>>>>>>> d236083517b2220e41f4915aaeffedfb3637260c
   };
   
 
