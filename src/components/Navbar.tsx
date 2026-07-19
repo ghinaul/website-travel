@@ -28,17 +28,18 @@ export default function Navbar({
           </div>
 
           {/* Desktop Menu */}
-          <div className="hidden lg:flex items-center gap-8">
-            <span onClick={() => { setIsAdminView(false); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition-colors">Beranda</span>
-            <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('wisata'); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition-colors">Paket Wisata & Umroh</span>
-            <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('armada'); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition-colors">Sewa Bus</span>
-            <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('dokumen'); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition-colors">Layanan Visa & ITAS</span>
-            <span onClick={() => { setIsAdminView(false); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition-colors">Testimoni & Galeri</span>
-            <span onClick={() => { setIsAdminView(false); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition-colors">FAQ & Kontak</span>
+        <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('paket'); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition">Paket Wisata & Umroh</span>
+        <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('bus'); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition">Sewa Bus</span>
+        <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('visa'); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition">Layanan Visa & ITAS</span>
+        <span onClick={() => { setIsAdminView(false); document.getElementById('testimonials')?.scrollIntoView({ behavior: 'smooth' }); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition">Testimoni & Galeri</span>
+        <span onClick={() => { setIsAdminView(false); document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' }); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition">FAQ & Kontak</span>
 
-            <button onClick={onNavigateToBooking} className="bg-amber-500 hover:bg-amber-600 text-emerald-950 px-5 py-2.5 rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition-all duration-200">
-              Sistem Pemesanan
-            </button>
+        <button 
+          onClick={onNavigateToBooking} 
+          className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-4 py-2 rounded-lg transition shadow-md"
+        >
+          Sistem Pemesanan
+        </button>
 
             {/* Admin Switcher Desk */}
             <div className={`items-center border-l border-emerald-800 pl-4 ${!isAdminView ? 'hidden' : 'flex'}`}>
@@ -72,8 +73,7 @@ export default function Navbar({
               {isOpen ? <X className="block h-6 w-6" /> : <Menu className="block h-6 w-6" />}
             </button>
           </div>
-        </div>
-      </div>
+          </div>
 
       {/* Mobile Menu */}
       <div className={`lg:hidden transition-all duration-300 ease-in-out ${isOpen ? 'block opacity-100' : 'hidden opacity-0'}`}>

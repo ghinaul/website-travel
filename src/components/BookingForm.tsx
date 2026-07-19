@@ -1,316 +1,322 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import React, { useState, useEffect } from 'react';
 import { Send, CheckCircle } from 'lucide-react';
 
 interface ServiceItem {
   id: number;
   service_name: string;
-  category: 'package' | 'rentcar';
+  category: string;
   price: number;
-  description: string;
 }
 
 interface BookingFormProps {
   preselectedService?: {
-    type: 'package' | 'rentcar';
-    id: number;
+    type: 'package' | 'rentcar' | 'visa_itas';
+    id: string;
     name: string;
   } | null;
-  onClearPreselected: () => void;
-  onBookingSuccess: () => void;
+  onClearPreselected?: () => void;
+  onBookingSuccess?: () => void;
 }
 
-export default function BookingForm({ 
-  preselectedService, 
-  onClearPreselected, 
-  onBookingSuccess 
-}: BookingFormProps) {
-  // --- State ---
+export default function BookingForm({ preselectedService, onClearPreselected, onBookingSuccess }: BookingFormProps) {
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [serviceType, setServiceType] = useState<'package' | 'rentcar'>('package');
-  const [selectedItemId, setSelectedItemId] = useState<number | ''>('');
+  const [selectedItemId, setSelectedItemId] = useState<string>('');
   
-  // Data Diri
   const [customerName, setCustomerName] = useState('');
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [email, setEmail] = useState('');
+  const [multiplier, setMultiplier] = useState<number>(1);
   const [bookingDate, setBookingDate] = useState('');
-  const [multiplier, setMultiplier] = useState(1);
   const [specialNotes, setSpecialNotes] = useState('');
-
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [validationError, setValidationError] = useState('');
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
-// --- 1. Fetch Data dari Backend Laravel ---
-useEffect(() => {
+  // Sinkronisasi ketika user klik tombol "Sewa Unit Ini" atau "Booking Sekarang" di luar
+  useEffect(() => {
+    if (preselectedService) {
+      // Jika tipenya visa_itas atau package, masukkan ke tab 'package'
+      const type = preselectedService.type === 'rentcar' ? 'rentcar' : 'package';
+      setServiceType(type);
+      setSelectedItemId(preselectedService.id);
+    }
+  }, [preselectedService]);
+
+  // Ambil data layanan dari API Laravel backend
+  useEffect(() => {
     const fetchServices = async () => {
       try {
         const response = await fetch('http://127.0.0.1:8000/api/services');
-        if (response.ok) {
-          const data: ServiceItem[] = await response.json();
-          setServices(data);
-
-          if (preselectedService) {
-            setServiceType(preselectedService.type);
-            setSelectedItemId(preselectedService.id);
-          } else {
-            const filtered = data.filter(item => item.category === serviceType);
-            if (filtered.length > 0) {
-              setSelectedItemId(filtered[0].id);
-            } else if (data.length > 0) {
-              setSelectedItemId(data[0].id);
-            }
-          }
-        }
+        const data = await response.json();
+        setServices(data);
       } catch (error) {
-        console.error("Gagal mengambil data layanan:", error);
-        setValidationError("Gagal memuat data layanan dari server. Pastikan Backend menyala.");
+        console.error('Error fetching services:', error);
       }
     };
-
     fetchServices();
   }, []);
 
-  const handleServiceTypeChange = (type: 'package' | 'rentcar') => {
-    onClearPreselected();
-    setServiceType(type);
-    setMultiplier(1);
-    setValidationError('');
-  };
-
-  // Filter layanan yang tampil di dropdown sesuai Tab kategori aktif
-  const activeSubItems = services.filter(item => item.category === serviceType);
   const currentSubItem = services.find(item => item.id === Number(selectedItemId));
-  
+
+  const itemType = currentSubItem?.category === 'fixed-date' || 
+                   currentSubItem?.service_name.toLowerCase().includes('umroh') || 
+                   currentSubItem?.service_name.toLowerCase().includes('barokah') ? 'fixed-date' : 'reguler';
+
+ // Memastikan Sewa Bus/Armada dan Paket Tour terpisah secara akurat
+  const activeSubItems = services.filter(item => {
+    const nameLower = item.service_name.toLowerCase();
+    
+    // 1. Cek apakah item mengandung kata visa atau itas
+    const isVisaItas = nameLower.includes('visa') || nameLower.includes('itas');
+    
+    // 2. Cek apakah item ini termasuk kendaraan/sewa mobil
+    const isRentCar = item.category === 'rentcar' || 
+                      nameLower.includes('bus') || 
+                      nameLower.includes('hiace') || 
+                      nameLower.includes('sewa');
+
+    // Jika user sedang aktif mengklik tab Visa & ITAS
+    if (selectedItemId === 'visa_itas') {
+      return isVisaItas;
+    }
+    
+    // Jika user berada di tab Sewa Kendaraan
+    if (serviceType === 'rentcar') {
+      return isRentCar && !isVisaItas;
+    }
+    
+    // Jika user berada di tab Paket Tour biasa (Umroh & Wisata Halal)
+    return !isRentCar && !isVisaItas;
+  });
+
   const calculateTotal = () => {
-    return currentSubItem ? currentSubItem.price * multiplier : 0;
+    if (!currentSubItem) return 0;
+    return serviceType === 'rentcar' ? currentSubItem.price * multiplier : currentSubItem.price;
   };
 
-  // --- 3. Submit Handler: KIRIM KE LARAVEL API ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setValidationError('');
     setIsSubmitting(true);
-
-    // Validasi Dasar
-    if (!customerName.trim()) {
-      setValidationError('Mohon masukkan nama lengkap Anda.');
-      setIsSubmitting(false);
-      return;
-    }
-    if (!whatsappNumber.trim()) {
-      setValidationError('Mohon masukkan nomor WhatsApp aktif Anda.');
-      setIsSubmitting(false);
-      return;
-    }
-    if (!email.trim()) {
-      setValidationError('Mohon masukkan alamat email Anda.');
-      setIsSubmitting(false);
-      return;
-    }
-    if (!bookingDate) {
-      setValidationError('Mohon pilih tanggal keberangkatan.');
-      setIsSubmitting(false);
-      return;
-    }
-    if (!selectedItemId) {
-      setValidationError('Mohon pilih layanan terlebih dahulu.');
-      setIsSubmitting(false);
-      return;
-    }
+    
+    const payload = {
+      service_id: Number(selectedItemId),
+      customer_name: customerName,
+      whatsapp_number: whatsappNumber,
+      email: email,
+      booking_date: itemType === 'fixed-date' ? null : bookingDate,
+      multiplier: serviceType === 'rentcar' ? multiplier : 1,
+      special_notes: specialNotes,
+      total_price: calculateTotal()
+    };
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/booking/store', {
+      const response = await fetch('http://127.0.0.1:8000/api/bookings', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({
-          customer_name: customerName,
-          email: email,
-          whatsapp_number: whatsappNumber,
-          booking_date: bookingDate,
-          service_id: Number(selectedItemId), // Dikirim sebagai service_id
-          participants: multiplier,
-          notes: specialNotes,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
-
       if (response.ok) {
-        setIsSubmitted(true);
+        setIsSuccess(true);
         if (onBookingSuccess) onBookingSuccess();
-      } else {
-        setValidationError(data.message || 'Gagal menyimpan pesanan.');
       }
     } catch (error) {
-      console.error("Error:", error);
-      setValidationError('Gagal terhubung ke server. Pastikan backend Laravel aktif.');
+      console.error('Submission error:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const getWhatsAppLink = () => {
-    const nomorAdmin = "6281285567034"; 
-
-    const textMessage = `Halo Admin Darunnajah Tours & Travel, saya ingin mengonfirmasi pemesanan yang baru saja saya buat di website:
-
-*Nama Pemesan:* ${customerName}
-*Email:* ${email}
-*No. WhatsApp:* ${whatsappNumber}
-*Layanan:* ${currentSubItem?.service_name || '-'}
-*Tanggal Booking:* ${bookingDate}
-*Jumlah Peserta/Durasi:* ${multiplier}
-
-Mohon untuk diproses lebih lanjut. Terima kasih!`;
-
-    return `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(textMessage)}`;
-  };
-
   const handleReset = () => {
-    setIsSubmitted(false);
+    setIsSuccess(false);
     setCustomerName('');
     setWhatsappNumber('');
     setEmail('');
     setBookingDate('');
-    setMultiplier(1);
     setSpecialNotes('');
-    onClearPreselected();
-    setServiceType('package');
+    setMultiplier(1);
+    setSelectedItemId('');
+    if (onClearPreselected) onClearPreselected();
   };
 
   return (
-    <div id="booking-section" className="py-20 bg-emerald-950 text-white relative">
-      <div className="absolute inset-0 z-0 opacity-10 pointer-events-none bg-[radial-gradient(ellipse_at_top,rgba(251,191,36,0.15)_0,transparent_50%)]" />
-      
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-12">
-          <span className="text-xs font-bold text-amber-400 uppercase tracking-widest bg-emerald-900 border border-emerald-800 px-3 py-1.5 rounded-full inline-block mb-3">
-            Sistem Booking Terpadu
-          </span>
-          <h2 className="text-3xl font-extrabold sm:text-4xl tracking-tight">
-            Formulir Reservasi Digital
-          </h2>
-        </div>
-
-        {!isSubmitted ? (
-          <div className="bg-emerald-900/40 border border-emerald-850/80 rounded-[32px] p-6 sm:p-12 backdrop-blur-xl shadow-2xl">
-            {/* Tabs */}
-            <div className="grid grid-cols-2 gap-2 mb-10 bg-[#031d10]/90 p-1.5 rounded-2xl border border-emerald-900/80">
-              <button type="button" onClick={() => handleServiceTypeChange('package')} className={`py-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest ${serviceType === 'package' ? 'bg-amber-500 text-emerald-950' : 'text-emerald-300/80'}`}>
-                Paket Wisata (Umroh)
+    <div id="booking-section" className="w-full max-w-4xl mx-auto my-12 bg-emerald-900/10 border border-emerald-800/50 rounded-3xl p-1 shadow-2xl backdrop-blur-sm block clear-both">
+      <div className="bg-emerald-900/20 rounded-[22px] p-6 md:p-8">
+        <h3 className="text-xl font-bold text-center text-white mb-6 font-mono uppercase tracking-wider">Formulir Sistem Pemesanan Online</h3>
+        
+        {!isSuccess ? (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            
+            {/* TABS LAYANAN */}
+            {/* TABS LAYANAN */}
+            <div className="grid grid-cols-3 bg-emerald-950/60 p-1.5 rounded-2xl border border-emerald-900">
+              <button
+                type="button"
+                onClick={() => { setServiceType('package'); setSelectedItemId(''); }}
+                className={`py-3.5 text-xs font-bold rounded-xl transition-all duration-300 ${
+                  serviceType === 'package' ? 'bg-amber-500 text-slate-900 shadow-lg' : 'text-emerald-400 hover:text-emerald-200'
+                }`}
+              >
+                Paket Tour & Travel
               </button>
-              <button type="button" onClick={() => handleServiceTypeChange('rentcar')} className={`py-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest ${serviceType === 'rentcar' ? 'bg-amber-500 text-emerald-950' : 'text-emerald-300/80'}`}>
-                Sewa Bus
+
+              <button
+                type="button"
+                onClick={() => { setServiceType('rentcar'); setSelectedItemId(''); }}
+                className={`py-3.5 text-xs font-bold rounded-xl transition-all duration-300 ${
+                  serviceType === 'rentcar' ? 'bg-amber-500 text-slate-900 shadow-lg' : 'text-emerald-400 hover:text-emerald-200'
+                }`}
+              >
+                Sewa Bus & Armada
+              </button>
+
+            <button
+                type="button"
+                onClick={() => { setServiceType('package'); setSelectedItemId('visa_itas'); }}
+                className={`py-3.5 text-xs font-bold rounded-xl transition-all duration-300 ${
+                  selectedItemId === 'visa_itas' ? 'bg-amber-500 text-slate-900 shadow-lg' : 'text-emerald-400 hover:text-emerald-200'
+                }`}
+              >
+                Visa & ITAS
               </button>
             </div>
 
-            {validationError && (
-              <div className="mb-6 p-4 bg-red-950/80 border border-red-800 rounded-xl text-red-200 text-sm">
-                {validationError}
+            {/* SELECTION DROPDOWN */}
+            <div>
+              <label className="block text-xs text-emerald-300 font-bold mb-1">
+                {serviceType === 'package' && selectedItemId !== 'visa_itas' && 'Pilih Paket Destinasi / Umroh / Wisata'}
+                {serviceType === 'rentcar' && 'Pilih Unit Bus / Mobil / Armada'}
+                {selectedItemId === 'visa_itas' && 'Pilih Jenis Layanan Dokumen'}
+              </label>
+              <select
+                value={selectedItemId}
+                onChange={(e) => setSelectedItemId(e.target.value)}
+                required
+                className="w-full bg-emerald-950 text-white rounded-xl px-4 py-3.5 border border-emerald-800 focus:outline-none text-sm text-left block"
+              >
+                <option value="">-- Silahkan Pilih --</option>
+                {activeSubItems.map((item) => (
+                  <option key={item.id} value={item.id} className="bg-emerald-950 text-white">
+                    {item.service_name} - Rp {item.price.toLocaleString('id-ID')}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* GRID DATA DIRI */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs text-emerald-300 font-bold mb-1">Nama Lengkap</label>
+                <input
+                  type="text"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  required
+                  className="w-full bg-emerald-950 text-white rounded-xl px-4 py-3 border border-emerald-800 text-sm"
+                  placeholder="Masukkan nama Anda"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-emerald-300 font-bold mb-1">No. WhatsApp (Aktif)</label>
+                <input
+                  type="text"
+                  value={whatsappNumber}
+                  onChange={(e) => setWhatsappNumber(e.target.value)}
+                  required
+                  className="w-full bg-emerald-950 text-white rounded-xl px-4 py-3 border border-emerald-800 text-sm"
+                  placeholder="Contoh: 08123456789"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-emerald-300 font-bold mb-1">Alamat Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full bg-emerald-950 text-white rounded-xl px-4 py-3 border border-emerald-800 text-sm"
+                  placeholder="nama@email.com"
+                />
+              </div>
+
+              {/* TIMING & DURATION CONDITIONS */}
+                <div>
+                  <label className="block text-xs text-emerald-300 font-bold mb-1">Tanggal Keberangkatan</label>
+                  <input
+                    type="date"
+                    value={bookingDate}
+                    onChange={(e) => setBookingDate(e.target.value)}
+                    required={itemType !== 'fixed-date'}
+                    disabled={itemType === 'fixed-date'}
+                    className={`w-full text-white rounded-xl px-4 py-3 border text-sm ${
+                      itemType === 'fixed-date'
+                        ? 'bg-emerald-900/30 border-emerald-950 text-gray-400 cursor-not-allowed'
+                        : 'bg-emerald-950 border-emerald-800'
+                    }`}
+                  />
+                  {itemType === 'fixed-date' && (
+                    <p className="text-[10px] text-amber-400 mt-1">
+                      * Tanggal otomatis mengikuti jadwal resmi paket tour/umroh ini.
+                    </p>
+                  )}
+                </div>
+            </div>
+
+            {/* CATATAN TAMBAHAN */}
+            <div>
+              <label className="block text-xs text-emerald-300 font-bold mb-1">Catatan Tambahan</label>
+              <input
+                type="text"
+                value={specialNotes}
+                onChange={(e) => setSpecialNotes(e.target.value)}
+                className="w-full bg-emerald-950 text-white rounded-xl px-4 py-3 border border-emerald-800 text-sm"
+                placeholder="Contoh: Request bangku depan, dll."
+              />
+            </div>
+
+            {/* ESTIMASI HARGA */}
+            {currentSubItem && (
+              <div className="bg-emerald-950/80 p-4 rounded-xl flex justify-between items-center border border-emerald-800">
+                <div>
+                  <span className="text-xs text-emerald-400 block font-medium">Estimasi Total Harga</span>
+                  <span className="text-xl font-bold text-amber-400">
+                    Rp {calculateTotal().toLocaleString('id-ID')}
+                  </span>
+                </div>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Pilih Layanan */}
-              <div className="grid sm:grid-cols-2 gap-6 bg-emerald-950/40 p-5 rounded-2xl border border-emerald-800/60">
-                <div>
-                  <label className="block text-xs text-emerald-300 uppercase font-bold mb-2">Pilih Layanan</label>
-                  <select 
-                    value={selectedItemId} 
-                    onChange={(e) => setSelectedItemId(Number(e.target.value))} 
-                    className="w-full bg-emerald-950 text-white rounded-xl px-4 py-3 border border-emerald-800"
-                  >
-                    {activeSubItems.length === 0 ? (
-                      <option value="">Memuat layanan...</option>
-                    ) : (
-                      activeSubItems.map(item => (
-                        <option key={item.id} value={item.id}>{item.service_name}</option>
-                      ))
-                    )}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs text-emerald-300 uppercase font-bold mb-2">
-                    {serviceType === 'package' ? 'Jumlah Peserta' : 'Durasi Sewa (Hari)'}
-                  </label>
-                  <div className="flex">
-                    <button type="button" onClick={() => setMultiplier(m => Math.max(1, m - 1))} className="px-4 py-3 border border-emerald-800 font-bold bg-emerald-950">-</button>
-                    <input type="number" min={1} value={multiplier} onChange={(e) => setMultiplier(Math.max(1, parseInt(e.target.value) || 1))} className="w-full text-center bg-emerald-950 border-y border-emerald-800" />
-                    <button type="button" onClick={() => setMultiplier(m => m + 1)} className="px-4 py-3 border border-emerald-800 font-bold bg-emerald-950">+</button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Data Diri */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-bold uppercase text-amber-400 border-b border-emerald-800 pb-2">Informasi Pemesan</h3>
-                <div className="grid sm:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-xs text-emerald-300 mb-1">Nama Lengkap</label>
-                    <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full bg-emerald-950 rounded-xl py-3 px-4 border border-emerald-800" />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-emerald-300 mb-1">No. WhatsApp</label>
-                    <input type="tel" value={whatsappNumber} onChange={(e) => setWhatsappNumber(e.target.value)} className="w-full bg-emerald-950 rounded-xl py-3 px-4 border border-emerald-800" />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-emerald-300 mb-1">Email</label>
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-emerald-950 rounded-xl py-3 px-4 border border-emerald-800" />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-emerald-300 mb-1">Tanggal Rencana Keberangkatan</label>
-                    <input type="date" value={bookingDate} onChange={(e) => setBookingDate(e.target.value)} className="w-full bg-emerald-950 rounded-xl py-3 px-4 border border-emerald-800" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs text-emerald-300 mb-1">Catatan Tambahan</label>
-                  <input type="text" value={specialNotes} onChange={(e) => setSpecialNotes(e.target.value)} className="w-full bg-emerald-950 rounded-xl py-3 px-4 border border-emerald-800" />
-                </div>
-              </div>
-
-              {/* Kalkulasi Harga */}
-              {currentSubItem && (
-                <div className="bg-emerald-950/80 p-4 rounded-xl flex justify-between items-center">
-                  <div>
-                    <span className="text-xs text-emerald-400">Estimasi Total</span>
-                  </div>
-                  <div className="text-xl font-bold text-amber-400">
-                    Rp {calculateTotal().toLocaleString('id-ID')}
-                  </div>
-                </div>
-              )}
-
-              {/* Submit */}
-              <button type="submit" disabled={isSubmitting} className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-emerald-950 font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50">
-                <Send className="h-4 w-4" />
+            {/* BUTTON SUBMIT */}
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-emerald-950 font-bold rounded-xl flex items-center justify-center gap-2 transition-colors duration-200 disabled:opacity-50"
+              >
+                <Send className="w-4 h-4" />
                 {isSubmitting ? 'Mengirim...' : 'Kirim Pemesanan'}
               </button>
-            </form>
-          </div>
-        ) : (
-          /* Success Screen */
-          <div className="bg-white text-emerald-950 rounded-3xl p-8 text-center">
-            <CheckCircle className="h-16 w-16 text-emerald-600 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold mb-2">Pemesanan Berhasil!</h3>
-            <p className="text-emerald-800 mb-6">Tim Darunnajah akan menghubungi Anda segera.</p>
-            
-            <a href={getWhatsAppLink()} target="_blank" rel="noreferrer" className="block w-full py-3 bg-[#25D366] text-white font-bold rounded-xl mb-3">
-              Konfirmasi via WhatsApp
-            </a>
-            <button onClick={handleReset} className="text-emerald-600 text-sm underline">
+            </div>
+
+          </form>
+) : (
+          /* SUCCESS SCREEN */
+          <div className="bg-emerald-950/90 border border-emerald-800 text-white rounded-2xl p-8 text-center flex flex-col items-center justify-center shadow-xl">
+            <CheckCircle className="w-16 h-16 text-emerald-400 mb-4" />
+            <h3 className="text-2xl font-bold mb-2 text-emerald-50">Pemesanan Berhasil!</h3>
+            <p className="text-emerald-300 mb-6">Tim Darunnajah akan menghubungi Anda segera.</p>
+            <button
+              onClick={handleReset}
+              className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-xl px-6 py-2.5 text-sm transition-colors shadow-md"
+            >
               Buat Pemesanan Baru
             </button>
           </div>
         )}
+
       </div>
     </div>
   );

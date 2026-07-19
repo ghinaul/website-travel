@@ -275,29 +275,7 @@ export default function TestimonialsGallery() {
                 <p className="text-xs text-slate-500">Momen-momen indah peninggalan rekam jejak wisata kami.</p>
               </div>
             </div>
-
-            {/* Gallery Category Filter buttons */}
-            <div className="flex flex-wrap gap-1.5 bg-slate-100/80 p-1 rounded-xl border border-slate-200/50">
-              {[
-                { id: 'all', label: 'Semu Fofo' },
-                { id: 'umrah', label: 'Umroh & Religi' },
-                { id: 'domestic', label: 'Wisata Halal' },
-                { id: 'bus', label: 'Armada Bus PO' }
-              ].map((btn) => (
-                <button
-                  key={btn.id}
-                  onClick={() => setActiveSubTab(btn.id as any)}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${
-                    activeSubTab === btn.id
-                      ? 'bg-emerald-950 text-white shadow-sm'
-                      : 'text-slate-600 hover:text-emerald-950 hover:bg-white'
-                  }`}
-                  id={`gallery-filter-${btn.id}`}
-                >
-                  {btn.label === 'Semu Fofo' ? 'Semua Foto' : btn.label}
-                </button>
-              ))}
-            </div>
+            
           </div>
 
           {/* Grid layout for images */}

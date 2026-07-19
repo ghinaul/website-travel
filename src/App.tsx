@@ -60,18 +60,30 @@ export default function App() {
     }, 100);
   };
 
-  // Scroll to catalog from Hero with optional tab setting
-  const handleExploreCatalog = (tabId?: 'all' | 'packages' | 'rentcar' | 'docs') => {
+// Scroll to catalog from Hero with optional tab setting
+  const handleExploreCatalog = (tabId?: 'all' | 'packages' | 'rentcar' | 'docs' | string) => {
     setIsAdminView(false);
+    
     if (tabId) {
-      setActiveCatalogTab(tabId);
+      if (tabId === 'paket' || tabId === 'packages') {
+        setActiveCatalogTab('packages');
+      } else if (tabId === 'bus' || tabId === 'rentcar') {
+        setActiveCatalogTab('rentcar');
+      } else if (tabId === 'visa' || tabId === 'docs') {
+        setActiveCatalogTab('docs');
+      } else {
+        setActiveCatalogTab('all');
+      }
+    } else {
+      setActiveCatalogTab('all');
     }
+
     setTimeout(() => {
       const element = document.getElementById('catalog');
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
-    }, 100);
+    }, 150);
   };
 
   return (
