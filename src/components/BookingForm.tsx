@@ -104,14 +104,16 @@ export default function BookingForm({ preselectedService, onClearPreselected, on
       customer_name: customerName,
       whatsapp_number: whatsappNumber,
       email: email,
-      booking_date: itemType === 'fixed-date' ? null : bookingDate,
+     booking_date: bookingDate || '2026-11-12',
       multiplier: serviceType === 'rentcar' ? multiplier : 1,
       special_notes: specialNotes,
-      total_price: calculateTotal()
+      total_price: calculateTotal(),
     };
 
+    console.log('pafffyload:', payload)
+
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/bookings', {
+      const response = await fetch('http://127.0.0.1:8000/api/booking/store', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -120,12 +122,31 @@ export default function BookingForm({ preselectedService, onClearPreselected, on
       if (response.ok) {
         setIsSuccess(true);
         if (onBookingSuccess) onBookingSuccess();
+      } else{
+        const r = await response.text();
+        console.error('else', r);
       }
     } catch (error) {
       console.error('Submission error:', error);
     } finally {
       setIsSubmitting(false);
     }
+  };
+   const getWhatsAppLink = () => {
+    const nomorAdmin = "6281285567034"; 
+
+    const textMessage = `Halo Admin Darunnajah Tours & Travel, saya ingin mengonfirmasi pemesanan yang baru saja saya buat di website:
+
+*Nama Pemesan:* ${customerName}
+*Email:* ${email}
+*No. WhatsApp:* ${whatsappNumber}
+*Layanan:* ${currentSubItem?.service_name || '-'}
+*Tanggal Booking:* ${bookingDate}
+*Jumlah Peserta/Durasi:* ${multiplier}
+
+Mohon untuk diproses lebih lanjut. Terima kasih!`;
+
+    return `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(textMessage)}`;
   };
 
   const handleReset = () => {
@@ -184,7 +205,7 @@ export default function BookingForm({ preselectedService, onClearPreselected, on
 
             {/* SELECTION DROPDOWN */}
             <div>
-              <label className="block text-xs text-emerald-300 font-bold mb-1">
+              <label className="block text-xs text-black-300 font-bold mb-1">
                 {serviceType === 'package' && selectedItemId !== 'visa_itas' && 'Pilih Paket Destinasi / Umroh / Wisata'}
                 {serviceType === 'rentcar' && 'Pilih Unit Bus / Mobil / Armada'}
                 {selectedItemId === 'visa_itas' && 'Pilih Jenis Layanan Dokumen'}
@@ -207,7 +228,7 @@ export default function BookingForm({ preselectedService, onClearPreselected, on
             {/* GRID DATA DIRI */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <label className="block text-xs text-emerald-300 font-bold mb-1">Nama Lengkap</label>
+                <label className="block text-xs text-black-300 font-bold mb-1">Nama Lengkap</label>
                 <input
                   type="text"
                   value={customerName}
@@ -219,9 +240,11 @@ export default function BookingForm({ preselectedService, onClearPreselected, on
               </div>
 
               <div>
-                <label className="block text-xs text-emerald-300 font-bold mb-1">No. WhatsApp (Aktif)</label>
+                <label className="block text-xs text-black-300 font-bold mb-1">No. WhatsApp (Aktif)</label>
                 <input
-                  type="text"
+                  type="tel"
+                  inputMode="numeric"
+                  pattern='[0-9]{10,15}'
                   value={whatsappNumber}
                   onChange={(e) => setWhatsappNumber(e.target.value)}
                   required
@@ -231,7 +254,7 @@ export default function BookingForm({ preselectedService, onClearPreselected, on
               </div>
 
               <div>
-                <label className="block text-xs text-emerald-300 font-bold mb-1">Alamat Email</label>
+                <label className="block text-xs text-black-300 font-bold mb-1">Alamat Email</label>
                 <input
                   type="email"
                   value={email}
@@ -244,7 +267,7 @@ export default function BookingForm({ preselectedService, onClearPreselected, on
 
               {/* TIMING & DURATION CONDITIONS */}
                 <div>
-                  <label className="block text-xs text-emerald-300 font-bold mb-1">Tanggal Keberangkatan</label>
+                  <label className="block text-xs text-black-300 font-bold mb-1">Tanggal Keberangkatan</label>
                   <input
                     type="date"
                     value={bookingDate}
@@ -267,7 +290,7 @@ export default function BookingForm({ preselectedService, onClearPreselected, on
 
             {/* CATATAN TAMBAHAN */}
             <div>
-              <label className="block text-xs text-emerald-300 font-bold mb-1">Catatan Tambahan</label>
+              <label className="block text-xs text-black-300 font-bold mb-1">Catatan Tambahan</label>
               <input
                 type="text"
                 value={specialNotes}
@@ -308,6 +331,9 @@ export default function BookingForm({ preselectedService, onClearPreselected, on
             <CheckCircle className="w-16 h-16 text-emerald-400 mb-4" />
             <h3 className="text-2xl font-bold mb-2 text-emerald-50">Pemesanan Berhasil!</h3>
             <p className="text-emerald-300 mb-6">Tim Darunnajah akan menghubungi Anda segera.</p>
+            <a href={getWhatsAppLink()} target="_blank" rel="noreferrer" className="block w-full py-3 bg-[#25D366] text-white font-bold rounded-xl mb-3">
+              Konfirmasi via WhatsApp
+            </a>
             <button
               onClick={handleReset}
               className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-xl px-6 py-2.5 text-sm transition-colors shadow-md"

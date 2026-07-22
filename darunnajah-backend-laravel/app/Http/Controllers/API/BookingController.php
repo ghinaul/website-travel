@@ -17,27 +17,42 @@ class BookingController extends Controller
 
     // 2. Fungsi STORE bawaan kamu untuk menyimpan data pendaftaran
     public function store(Request $request)
-    {
-        // 1. Validasi semua data dari form React agar sesuai dengan Model & Database
-        $validated = $request->validate([
-            'customer_name'   => 'required|string|max:255',
-            'email'           => 'required|email',
-            'whatsapp_number' => 'required|string',
-            'booking_date'    => 'required|string',
-            'service_id'      => 'required|exists:services,id',
-            'participants'    => 'required|integer',
-        ]);
+{
+    // 1. Validasi input
+    $validated = $request->validate([
+        'customer_name'   => 'required|string|max:255',
+        'email'           => 'required|email',
+        'whatsapp_number' => 'required|string',
+        'booking_date'    => 'required|string',
+        'service_id'      => 'required|exists:services,id',
+        'participants'    => 'nullable|integer',
+        'special_notes'   => 'nullable|string',
+        'total_price'     => 'nullable|numeric',
+    ]);
 
-        // 2. Simpan data ke dalam tabel bookings
-        $booking = Booking::create($validated);
+    // 2. Buat array data aman (hanya kolom yang pasti ada di database)
+    $dataToInsert = [
+        'customer_name'   => $validated['customer_name'],
+        'email'           => $validated['email'],
+        'whatsapp_number' => $validated['whatsapp_number'] ?? $request->whatsapp_number,
+        'booking_date'    => $validated['booking_date'],
+        'service_id'      => $validated['service_id'],
+        'participants'    => 1,
+        'notes'   => $validated['special_notes'] ?? null,
+        //'total_price'     => $validated['total_price'] ?? 0,
+        'status'          => 'Pending', // memberi nilai bawaan status
+    ];
 
-        // 3. Berikan respon sukses berbentuk JSON ke React
-        return response()->json([
-            'success' => true,
-            'message' => 'Pemesanan Berhasil Disimpan! Tim Darunnajah akan segera menghubungi Anda.',
-            'data'    => $booking
-        ], 201);
-    }
+    // 3. Simpan ke database
+    $booking = Booking::create($dataToInsert);
+
+    // 4. Respon JSON sukses ke React
+    return response()->json([
+        'success' => true,
+        'message' => 'Pemesanan Berhasil Disimpan!',
+        'data'    => $booking
+    ], 201);
+}
 
     // 3. Fungsi UPDATE untuk mengubah status pemesanan dari dashboard pegawai
     public function update(Request $request, $id)

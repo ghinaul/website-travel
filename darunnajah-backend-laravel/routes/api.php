@@ -7,7 +7,7 @@ use App\Models\Service;
 
 // Jalur pintu masuk untuk menyimpan data booking dari React (Sudah ada)
 Route::post('/booking/store', [BookingController::class, 'store']);
-
+//Route::get('/bookings', [BookingController::class, 'store']);
 // JALUR TAMBAHAN: Untuk mengambil data pendaftaran ke Dashboard React
 Route::get('/bookings', [BookingController::class, 'index']);
 Route::put('/bookings/{id}', [BookingController::class, 'update']);

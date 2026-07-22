@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('email');            // Email pemesan
             $table->string('whatsapp_number');   // No WhatsApp
             $table->date('booking_date');        // Tanggal Keberangkatan
-
+$table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
             // Hapus baris 20 lama, gantikan dengan foreignId ini:
             $table->foreignId('service_id')->constrained('services');
 

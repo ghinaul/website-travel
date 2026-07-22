@@ -28,6 +28,7 @@ export default function Navbar({
           </div>
 
           {/* Desktop Menu */}
+        <span onClick={() => { setIsAdminView(false);  onNavigateToCatalogTab('all'); }} className="block px-4 py-3 rounded-lg text-base font-medium text-emerald-100 hover:text-white hover:bg-emerald-800 transition-colors cursor-pointer">Beranda</span>
         <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('paket'); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition">Paket Wisata & Umroh</span>
         <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('bus'); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition">Sewa Bus</span>
         <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('visa'); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition">Layanan Visa & ITAS</span>
