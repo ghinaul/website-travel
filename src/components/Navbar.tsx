@@ -28,11 +28,11 @@ export default function Navbar({
           </div>
 
           {/* Desktop Menu */}
-        <span onClick={() => { setIsAdminView(false);  onNavigateToCatalogTab('all'); }} className="block px-4 py-3 rounded-lg text-base font-medium text-emerald-100 hover:text-white hover:bg-emerald-800 transition-colors cursor-pointer">Beranda</span>
+        <span onClick={() => { setIsAdminView(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition-colors">Beranda</span>
         <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('paket'); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition">Paket Wisata & Umroh</span>
         <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('bus'); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition">Sewa Bus</span>
         <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('visa'); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition">Layanan Visa & ITAS</span>
-        <span onClick={() => { setIsAdminView(false); document.getElementById('testimonials')?.scrollIntoView({ behavior: 'smooth' }); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition">Testimoni & Galeri</span>
+        <span onClick={() => { setIsAdminView(false); document.getElementById('testimonials')?.scrollIntoView({ behavior: 'smooth' }); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition-colors">Testimoni & Galeri</span>
         <span onClick={() => { setIsAdminView(false); document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' }); }} className="cursor-pointer text-sm font-medium text-emerald-100 hover:text-white transition">FAQ & Kontak</span>
 
         <button 
@@ -79,11 +79,11 @@ export default function Navbar({
       {/* Mobile Menu */}
       <div className={`lg:hidden transition-all duration-300 ease-in-out ${isOpen ? 'block opacity-100' : 'hidden opacity-0'}`}>
         <div className="px-2 pt-2 pb-4 space-y-1 bg-emerald-900 border-t border-emerald-800 shadow-inner">
-          <span onClick={() => { setIsAdminView(false); setIsOpen(false); }} className="block px-4 py-3 rounded-lg text-base font-medium text-emerald-100 hover:text-white hover:bg-emerald-800 transition-colors cursor-pointer">Beranda</span>
+          <span onClick={() => { setIsAdminView(false); setIsOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="block px-4 py-3 rounded-lg text-base font-medium text-emerald-100 hover:text-white hover:bg-emerald-800 transition-colors cursor-pointer">Beranda</span>
           <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('wisata'); setIsOpen(false); }} className="block px-4 py-3 rounded-lg text-base font-medium text-emerald-100 hover:text-white hover:bg-emerald-800 transition-colors cursor-pointer">Paket Wisata & Umroh</span>
           <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('armada'); setIsOpen(false); }} className="block px-4 py-3 rounded-lg text-base font-medium text-emerald-100 hover:text-white hover:bg-emerald-800 transition-colors cursor-pointer">Sewa Bus</span>
           <span onClick={() => { setIsAdminView(false); onNavigateToCatalogTab('dokumen'); setIsOpen(false); }} className="block px-4 py-3 rounded-lg text-base font-medium text-emerald-100 hover:text-white hover:bg-emerald-800 transition-colors cursor-pointer">Layanan Visa & ITAS</span>
-          <span onClick={() => { setIsAdminView(false); setIsOpen(false); }} className="block px-4 py-3 rounded-lg text-base font-medium text-emerald-100 hover:text-white hover:bg-emerald-800 transition-colors cursor-pointer">Testimoni & Galeri</span>
+         <span onClick={() => { setIsAdminView(false); setIsOpen(false); document.getElementById('testimonials')?.scrollIntoView({ behavior: 'smooth' }); }} className="block px-4 py-3 rounded-lg text-base font-medium text-emerald-100 hover:text-white hover:bg-emerald-800 transition-colors cursor-pointer">Testimoni & Galeri</span>
           <span onClick={() => { setIsAdminView(false); setIsOpen(false); }} className="block px-4 py-3 rounded-lg text-base font-medium text-emerald-100 hover:text-white hover:bg-emerald-800 transition-colors cursor-pointer">FAQ & Kontak</span>
 
           <div className="pt-4 px-4 border-t border-emerald-800 space-y-3">

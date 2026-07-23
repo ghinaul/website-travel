@@ -125,8 +125,10 @@ export default function App() {
             setActiveTab={setActiveCatalogTab}
           />
 
-          {/* Testimonial and previous trip gallery documentation */}
+         {/* Testimonial and previous trip gallery documentation */}
+          <div id="testimonials">
           <TestimonialsGallery />
+        </div>
 
           {/* Live system booking step-form */}
           <BookingForm 

@@ -22,9 +22,9 @@ export default function WhyUs() {
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl font-extrabold text-emerald-950 sm:text-5xl tracking-tight leading-tight">
-            Mengapa Memilih <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-700 to-emerald-500">Darunnajah Tours & Travel</span>?
-          </h2>
+          Mengapa Memilih <br />
+          Darunnajah Tours & Travel?
+        </h2>
           <p className="mt-4 text-slate-600 text-sm md:text-base leading-relaxed">
             Menyatukan pengalaman puluhan tahun di bidang Haji, Umrah, dan transportasi bus pariwisata profesional guna menyuguhkan perjalanan berkualitas prima untuk kenyamanan Anda.
           </p>

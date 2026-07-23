@@ -171,7 +171,7 @@ export default function TestimonialsGallery() {
     : GALLERY_ITEMS.filter(item => item.category === activeSubTab);
 
   return (
-    <section id="testimonials-gallery" className="py-24 bg-white border-y border-slate-100">
+    <section id="testimonials" className="py-24 bg-white border-y border-slate-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header Section */}
